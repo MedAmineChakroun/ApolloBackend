@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ApolloBackend.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,9 +86,19 @@ app.UseCors("AllowAngularApp");
 
 app.UseHttpsRedirection();
 
+//set application Roles 
+// Inside `app.UseHttpsRedirection()
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    await RoleInitializer.InitializeRoles(serviceProvider);
+}
+//;` before `app.UseAuthentication();`
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+

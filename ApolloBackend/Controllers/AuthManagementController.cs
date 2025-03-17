@@ -1,4 +1,5 @@
 ﻿using ApolloBackend.Configurations;
+using ApolloBackend.Migrations;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -48,11 +49,15 @@ namespace ApolloBackend.Controllers
             var isCreated = await _userManager.CreateAsync(newUser, requestDto.Password);
             if (!isCreated.Succeeded)
                 return BadRequest(isCreated.Errors.Select(x => x.Description).ToList());
+
+            //set customer role to auth user
+            await _userManager.AddToRoleAsync(newUser, "customer"); 
+
             //generate token
             return Ok(new RegistrationRequestResponse()
             {
                 Result = true,
-                Token = GenerateJwtToken(newUser)
+                Token = await GenerateJwtTokenAsync(newUser)
             });
         }
         [HttpPost("Login")]
@@ -69,7 +74,7 @@ namespace ApolloBackend.Controllers
             if (!isPasswordValid)
                 return BadRequest(new { Message = "Invalid  password." });
 
-            var token = GenerateJwtToken(existingUser);
+            var token = await GenerateJwtTokenAsync(existingUser);
             return Ok(new LoginRequestResponse()
             {
                 Token = token,
@@ -77,22 +82,33 @@ namespace ApolloBackend.Controllers
             });
         }
 
-        private string GenerateJwtToken(User user)
+        private async Task<string> GenerateJwtTokenAsync(User user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Secret));
 
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            //set jwt claims
+            var claims = new List<Claim>
+                {
+                  new Claim("Id", user.Id),
+                  new Claim("UserName", user.UserName),
+                  new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                  new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                 };
+
+            // Add role claims
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(new[]{
-                    new Claim("Id", user.Id),
-                    new Claim("UserName", user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Sub,user.Email),
-                    new Claim(JwtRegisteredClaimNames.Email,user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                    
-                }),
+                Subject = new ClaimsIdentity(claims),
+
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             };
