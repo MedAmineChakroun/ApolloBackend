@@ -40,7 +40,7 @@ namespace ApolloBackend.Controllers
             if (emailExist != null)
                 return BadRequest("email exists!");
             var newUser = new User()
-            {   
+            {
                 Email = requestDto.Email,
                 UserName = requestDto.Name,
             };
@@ -51,7 +51,7 @@ namespace ApolloBackend.Controllers
                 return BadRequest(isCreated.Errors.Select(x => x.Description).ToList());
 
             //set customer role to auth user
-            await _userManager.AddToRoleAsync(newUser, "customer"); 
+            await _userManager.AddToRoleAsync(newUser, "customer");
 
             //generate token
             return Ok(new RegistrationRequestResponse()

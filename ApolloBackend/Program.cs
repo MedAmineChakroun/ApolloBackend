@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ApolloBackend.Services;
+using ApolloBackend.Functions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfi
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ERPContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ErpConnection")));
+
 
 // Add CORS Policy
 builder.Services.AddCors(options =>
@@ -31,19 +35,20 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ProduitsFunctions>();
 
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
-{   
-   
+{
+
     // Password policy configuration
     options.Password.RequireDigit = true; // Require a digit
     options.Password.RequireLowercase = true; // Require lowercase letter
     options.Password.RequireUppercase = true; // Require uppercase letter
     options.Password.RequireNonAlphanumeric = true; // Require a non-alphanumeric character (symbol)
     options.Password.RequiredLength = 8; // Minimum length of the password (increased for security)
-    
+
     options.SignIn.RequireConfirmedAccount = false;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 
@@ -101,4 +106,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

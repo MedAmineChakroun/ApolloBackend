@@ -5,6 +5,8 @@ namespace ApolloBackend.Models
 {
     public class User:IdentityUser
     {
+        [Required]
+        [EmailAddress]
         public override string Email { get; set; }
     }
 }
