@@ -19,7 +19,7 @@ namespace ApolloBackend.Controllers
             _produitsFunctions = produitsFunctions;
         }
 
-        [HttpGet("GetListeProduit")]
+        [HttpGet]
         public async Task<JsonResponseData> GetListeProduit()
         {
             return new JsonResponseData

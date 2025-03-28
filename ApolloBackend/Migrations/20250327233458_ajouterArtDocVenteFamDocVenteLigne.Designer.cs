@@ -4,6 +4,7 @@ using ApolloBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApolloBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250327233458_ajouterArtDocVenteFamDocVenteLigne")]
+    partial class ajouterArtDocVenteFamDocVenteLigne
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,164 +24,6 @@ namespace ApolloBackend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.HasSequence<int>("ArticleCodeSequence")
-                .StartsAt(101000L);
-
-            modelBuilder.HasSequence<int>("DocumentCodeSequence")
-                .StartsAt(301000L);
-
-            modelBuilder.HasSequence<int>("FamilleCodeSequence")
-                .StartsAt(201000L);
-
-            modelBuilder.Entity("ApolloBackend.Models.Article", b =>
-                {
-                    b.Property<int>("ArtId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArtId"));
-
-                    b.Property<string>("ArtCode")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasDefaultValueSql("FORMAT(NEXT VALUE FOR ArticleCodeSequence, '0000000')");
-
-                    b.Property<short?>("ArtEtat")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("ArtFamille")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ArtImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ArtIntitule")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("ArtPrixAchat")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("ArtPrixVente")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ArtUnite")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ArtId");
-
-                    b.HasIndex("ArtCode")
-                        .IsUnique();
-
-                    b.ToTable("Articles");
-                });
-
-            modelBuilder.Entity("ApolloBackend.Models.DocumentVente", b =>
-                {
-                    b.Property<int>("DocId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocId"));
-
-                    b.Property<DateTime?>("DocDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DocPiece")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasDefaultValueSql("FORMAT(NEXT VALUE FOR DocumentCodeSequence, '0000000')");
-
-                    b.Property<decimal?>("DocTht")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("DocTiersCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DocTiersIntitule")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("DocTtc")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<short?>("DocType")
-                        .HasColumnType("smallint");
-
-                    b.HasKey("DocId");
-
-                    b.HasIndex("DocPiece")
-                        .IsUnique();
-
-                    b.ToTable("DocumentVentes");
-                });
-
-            modelBuilder.Entity("ApolloBackend.Models.DocumentVenteLigne", b =>
-                {
-                    b.Property<int>("LigneId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LigneId"));
-
-                    b.Property<string>("LigneArtCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LigneArtDesi")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LigneDocPiece")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<decimal?>("LigneHt")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("LignePu")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("LigneQte")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("LigneTtc")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("LigneId");
-
-                    b.HasIndex("LigneDocPiece");
-
-                    b.ToTable("DocumentVenteLignes");
-                });
-
-            modelBuilder.Entity("ApolloBackend.Models.Famille", b =>
-                {
-                    b.Property<int>("FamId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FamId"));
-
-                    b.Property<string>("FamCode")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasDefaultValueSql("FORMAT(NEXT VALUE FOR FamilleCodeSequence, '0000000')");
-
-                    b.Property<string>("FamIntitule")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("FamId");
-
-                    b.HasIndex("FamCode")
-                        .IsUnique();
-
-                    b.ToTable("Familles");
-                });
 
             modelBuilder.Entity("ApolloBackend.Models.User", b =>
                 {
@@ -374,16 +219,6 @@ namespace ApolloBackend.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ApolloBackend.Models.DocumentVenteLigne", b =>
-                {
-                    b.HasOne("ApolloBackend.Models.DocumentVente", null)
-                        .WithMany()
-                        .HasForeignKey("LigneDocPiece")
-                        .HasPrincipalKey("DocPiece")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
