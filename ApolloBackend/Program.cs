@@ -35,7 +35,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//declare Services
 builder.Services.AddScoped<ProduitsFunctions>();
+builder.Services.AddScoped<FamilleFunctions>();
 
 //auths and jwt configs
 // Add Identity with custom User class

@@ -17,5 +17,18 @@ namespace ApolloBackend.Functions
         {
           return  await _context.ListeArticles.ToListAsync();
         }
+
+        public async Task<List<ListeArticle>> GetProduitsByFamille(string famille = null)
+        {
+            var query = _context.ListeArticles.AsQueryable();
+
+            if (!string.IsNullOrEmpty(famille))
+            {
+                query = query.Where(p => p.ArtFamille == famille);
+            }
+
+            return await query.ToListAsync();
+        }
+
     }
 }

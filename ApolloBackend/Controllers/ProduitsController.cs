@@ -1,8 +1,6 @@
 ﻿using ApolloBackend.Functions;
 using ApolloBackend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.DotNet.MSIdentity.Shared;
-using static Azure.Core.HttpHeader;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,6 +29,12 @@ namespace ApolloBackend.Controllers
                 IsSuccess = true,
                 Message = "" 
             };
+        }
+        [HttpGet("byFamille")]
+        public async Task<IActionResult> GetByFamille([FromQuery] string famille)
+        {
+            var produits = await _produitsFunctions.GetProduitsByFamille(famille);
+            return Ok(produits);
         }
     }
 }
