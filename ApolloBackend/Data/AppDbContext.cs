@@ -10,6 +10,8 @@ namespace ApolloBackend.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+
+        public DbSet<Client> Clients { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Famille> Familles { get; set; }
         public DbSet<DocumentVente> DocumentVentes { get; set; }
@@ -19,6 +21,10 @@ namespace ApolloBackend.Data
             base.OnModelCreating(modelBuilder);
 
             // Define sequences
+            modelBuilder.HasSequence<int>("ClientCodeSequence")
+                .StartsAt(401000)
+                .IncrementsBy(1);
+
             modelBuilder.HasSequence<int>("ArticleCodeSequence")
                 .StartsAt(101000)
                 .IncrementsBy(1);
@@ -43,14 +49,31 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<IdentityUserToken<string>>()
                 .HasKey(x => new { x.UserId, x.LoginProvider, x.Name });
 
+            // Client configuration
+            modelBuilder.Entity<Client>(entity =>
+            {
+                entity.HasKey(e => e.TiersId);
+                entity.Property(e => e.TiersCode)
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasDefaultValueSql("FORMAT(NEXT VALUE FOR ClientCodeSequence, '0000000')");
+                entity.HasIndex(e => e.TiersCode).IsUnique();
+            });
+
+            modelBuilder.Entity<User>()
+        .HasOne(u => u.Client)
+        .WithMany() // No navigation property back to User in Client
+        .HasForeignKey(u => u.ClientId)
+        .OnDelete(DeleteBehavior.Cascade);
+
             // Article configuration
             modelBuilder.Entity<Article>(entity =>
             {
                 entity.HasKey(e => e.ArtId);
                 entity.Property(e => e.ArtCode)
-                      .IsRequired()
-                      .HasMaxLength(10)
-                      .HasDefaultValueSql("FORMAT(NEXT VALUE FOR ArticleCodeSequence, '0000000')");
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasDefaultValueSql("FORMAT(NEXT VALUE FOR ArticleCodeSequence, '0000000')");
                 entity.HasIndex(e => e.ArtCode).IsUnique();
             });
 
@@ -59,9 +82,9 @@ namespace ApolloBackend.Data
             {
                 entity.HasKey(e => e.FamId);
                 entity.Property(e => e.FamCode)
-                      .IsRequired()
-                      .HasMaxLength(10)
-                      .HasDefaultValueSql("FORMAT(NEXT VALUE FOR FamilleCodeSequence, '0000000')");
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasDefaultValueSql("FORMAT(NEXT VALUE FOR FamilleCodeSequence, '0000000')");
                 entity.HasIndex(e => e.FamCode).IsUnique();
             });
 
@@ -70,9 +93,9 @@ namespace ApolloBackend.Data
             {
                 entity.HasKey(e => e.DocId);
                 entity.Property(e => e.DocPiece)
-                      .IsRequired()
-                      .HasMaxLength(10)
-                      .HasDefaultValueSql("FORMAT(NEXT VALUE FOR DocumentCodeSequence, '0000000')");
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .HasDefaultValueSql("FORMAT(NEXT VALUE FOR DocumentCodeSequence, '0000000')");
                 entity.HasIndex(e => e.DocPiece).IsUnique();
             });
 
@@ -81,13 +104,13 @@ namespace ApolloBackend.Data
             {
                 entity.HasKey(e => e.LigneId);
                 entity.Property(e => e.LigneDocPiece)
-                      .IsRequired()  // Added IsRequired() for consistency
-                      .HasMaxLength(10);
+                    .IsRequired()
+                    .HasMaxLength(10);
                 entity.HasOne<DocumentVente>()
-                      .WithMany()
-                      .HasForeignKey(e => e.LigneDocPiece)
-                      .HasPrincipalKey(e => e.DocPiece)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany()
+                    .HasForeignKey(e => e.LigneDocPiece)
+                    .HasPrincipalKey(e => e.DocPiece)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

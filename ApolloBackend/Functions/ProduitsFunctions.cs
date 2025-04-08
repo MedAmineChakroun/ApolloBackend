@@ -18,6 +18,18 @@ namespace ApolloBackend.Functions
           return  await _context.ListeArticles.ToListAsync();
         }
 
+        public async Task<ListeArticle> GetProduitById(int id)
+        {
+            var produit = await _context.ListeArticles.AsQueryable()
+                .Where(p => p.ArtId == id)
+                .FirstOrDefaultAsync();
+            if (produit == null)
+            {
+                return null;
+            }
+            return produit;
+
+        }
         public async Task<List<ListeArticle>> GetProduitsByFamille(string famille = null)
         {
             var query = _context.ListeArticles.AsQueryable();

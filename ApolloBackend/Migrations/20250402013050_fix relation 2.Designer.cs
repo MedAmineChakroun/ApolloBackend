@@ -4,6 +4,7 @@ using ApolloBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApolloBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250402013050_fix relation 2")]
+    partial class fixrelation2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,6 +112,9 @@ namespace ApolloBackend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TiersVille")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TiersId");
@@ -282,7 +288,9 @@ namespace ApolloBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("ClientId")
+                        .IsUnique()
+                        .HasFilter("[ClientId] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -438,8 +446,8 @@ namespace ApolloBackend.Migrations
             modelBuilder.Entity("ApolloBackend.Models.User", b =>
                 {
                     b.HasOne("ApolloBackend.Models.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId")
+                        .WithOne("User")
+                        .HasForeignKey("ApolloBackend.Models.User", "ClientId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Client");
@@ -494,6 +502,11 @@ namespace ApolloBackend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ApolloBackend.Models.Client", b =>
+                {
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

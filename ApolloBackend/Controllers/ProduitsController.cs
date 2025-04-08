@@ -30,6 +30,18 @@ namespace ApolloBackend.Controllers
                 Message = "" 
             };
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProduitById(int id)
+        {
+            var produit = await _produitsFunctions.GetProduitById(id);
+
+            if (produit == null)
+            {
+                return NotFound($"Product with ID {id} not found");
+            }
+
+            return Ok(produit);
+        }
         [HttpGet("byFamille")]
         public async Task<IActionResult> GetByFamille([FromQuery] string famille)
         {
