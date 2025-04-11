@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ApolloBackend.Services;
 using ApolloBackend.Functions;
+using ApolloBackend.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ProduitsFunctions>();
 builder.Services.AddScoped<FamilleFunctions>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
+builder.Services.AddScoped<IDocumentVente, DocumentVenteFunctions>();
+builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
