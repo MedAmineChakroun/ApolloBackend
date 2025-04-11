@@ -16,6 +16,7 @@ namespace ApolloBackend.Data
         public DbSet<Famille> Familles { get; set; }
         public DbSet<DocumentVente> DocumentVentes { get; set; }
         public DbSet<DocumentVenteLigne> DocumentVenteLignes { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -112,6 +113,19 @@ namespace ApolloBackend.Data
                     .HasPrincipalKey(e => e.DocPiece)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            // Configuration de la relation WishlistItem → Client
+            modelBuilder.Entity<WishlistItem>()
+                .HasOne(w => w.Client)
+                .WithMany() // ou .WithMany(c => c.WishlistItems) si tu veux naviguer côté Client
+                .HasForeignKey(w => w.TiersId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configuration de la relation WishlistItem → Article
+            modelBuilder.Entity<WishlistItem>()
+                .HasOne(w => w.Article)
+                .WithMany() // ou .WithMany(a => a.WishlistItems) si tu veux naviguer côté Article
+                .HasForeignKey(w => w.ArtId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

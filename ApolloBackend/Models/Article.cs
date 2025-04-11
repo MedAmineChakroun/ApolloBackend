@@ -1,4 +1,6 @@
-﻿namespace ApolloBackend.Models
+﻿using Microsoft.AspNetCore.Authentication;
+
+namespace ApolloBackend.Models
 {
     public class Article
     {
@@ -20,6 +22,8 @@
         public string? ArtUnite { get; set; }
 
         public string? ArtImageUrl { get; set; }
+
+        public decimal? ArtTvaTaux { get; set; }
 
 
     }

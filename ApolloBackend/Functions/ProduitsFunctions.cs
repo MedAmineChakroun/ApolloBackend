@@ -1,26 +1,27 @@
 ﻿using ApolloBackend.Data;
 using ApolloBackend.Entities;
 using ApolloBackend.Interfaces;
+using ApolloBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApolloBackend.Functions
 {
     public class ProduitsFunctions : IProduits
     {
-        private readonly ERPContext _context;
+        private readonly AppDbContext _context;
 
-        public ProduitsFunctions(ERPContext context)
+        public ProduitsFunctions(AppDbContext context)
         {
             _context = context;
         }
-        public async Task<List<ListeArticle>> GetProduits()
+        public async Task<List<Article>> GetProduits()
         {
-          return  await _context.ListeArticles.ToListAsync();
+          return  await _context.Articles.ToListAsync();
         }
 
-        public async Task<ListeArticle> GetProduitById(int id)
+        public async Task<Article> GetProduitById(int id)
         {
-            var produit = await _context.ListeArticles.AsQueryable()
+            var produit = await _context.Articles.AsQueryable()
                 .Where(p => p.ArtId == id)
                 .FirstOrDefaultAsync();
             if (produit == null)
@@ -30,9 +31,9 @@ namespace ApolloBackend.Functions
             return produit;
 
         }
-        public async Task<List<ListeArticle>> GetProduitsByFamille(string famille = null)
+        public async Task<List<Article>> GetProduitsByFamille(string famille = null)
         {
-            var query = _context.ListeArticles.AsQueryable();
+            var query = _context.Articles.AsQueryable();
 
             if (!string.IsNullOrEmpty(famille))
             {

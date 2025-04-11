@@ -1,11 +1,12 @@
 ﻿using ApolloBackend.Entities;
+using ApolloBackend.Models;
 
 namespace ApolloBackend.Interfaces
 {
     public interface IProduits
     {
-        Task<List<ListeArticle>> GetProduits();
-        Task<ListeArticle> GetProduitById(int id);
-        Task<List<ListeArticle>> GetProduitsByFamille(string famille);
+        Task<List<Article>> GetProduits();
+        Task<Article> GetProduitById(int id);
+        Task<List<Article>> GetProduitsByFamille(string famille);
     }
 }

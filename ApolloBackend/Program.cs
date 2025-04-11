@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen();
 //declare Services
 builder.Services.AddScoped<ProduitsFunctions>();
 builder.Services.AddScoped<FamilleFunctions>();
-
+builder.Services.AddScoped<IWishlistService, WishlistService>();
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
