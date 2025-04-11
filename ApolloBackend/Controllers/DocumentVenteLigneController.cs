@@ -1,6 +1,7 @@
 ﻿using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,7 @@ namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DocumentVenteLigneController : ControllerBase
     {
         private readonly IDocumentVenteLigne _documentVenteLigneService;

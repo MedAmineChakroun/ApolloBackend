@@ -11,7 +11,5 @@ namespace ApolloBackend.Interfaces
 
         Task<DocumentVente> CreateDocumentVente(DocumentVenteDto documentVenteDto);
 
-        Task<DocumentVente> UpdateDocumentVenteTotals(string idDoc , decimal tht , decimal ttc);
-
     }
 }

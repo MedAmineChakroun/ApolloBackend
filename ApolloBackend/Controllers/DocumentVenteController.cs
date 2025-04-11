@@ -1,6 +1,7 @@
 ﻿using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+    [Authorize]
     public class DocumentVenteController : ControllerBase
     {
         private readonly IDocumentVente _documentVenteService;
@@ -34,12 +35,7 @@ namespace ApolloBackend.Controllers
             var newDocument = await _documentVenteService.CreateDocumentVente(documentVenteDto);
             return Ok(newDocument);
         }
-        [HttpPut("update/{idDoc}/{thc}/{ttc}")]
-        public async Task<ActionResult<DocumentVente>> UpdateDocumentVenteTotals(string idDoc, decimal thc, decimal ttc)
-        {
-            var updatedDocument = await _documentVenteService.UpdateDocumentVenteTotals(idDoc, thc, ttc);
-            return Ok(updatedDocument);
-        }
+        
 
     }
 }

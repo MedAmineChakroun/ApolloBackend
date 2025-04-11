@@ -2,6 +2,7 @@
 using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
+using Microsoft.CodeAnalysis.Editing;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApolloBackend.Functions
@@ -33,32 +34,13 @@ namespace ApolloBackend.Functions
             DocumentVente.DocTiersCode = documentVenteDto.DocTiersCode;
             DocumentVente.DocTiersIntitule = documentVenteDto.DocTiersIntitule;
             DocumentVente.DocDate = DateTime.Now;
-
+            DocumentVente.DocTht = documentVenteDto.DocTht;
+            DocumentVente.DocTtc = documentVenteDto.DocTtc;
             _context.DocumentVentes.Add(DocumentVente);
             await _context.SaveChangesAsync();
             return DocumentVente;
         }
-        public async Task<DocumentVente?> UpdateDocumentVenteTotals(string docPiece, decimal tht, decimal ttc)
-        {
-            // Find the document by DocPiece
-            var document = await _context.DocumentVentes
-                .FirstOrDefaultAsync(d => d.DocPiece == docPiece);
-
-            if (document == null)
-            {
-                // Handle not found case
-                return null;
-            }
-
-            // Update the totals
-            document.DocTht = tht;
-            document.DocTtc = ttc;
-
-            // Save changes to the database
-            await _context.SaveChangesAsync();
-
-            return document;
-        }
+      
 
 
     }
