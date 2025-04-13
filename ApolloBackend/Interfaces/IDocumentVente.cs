@@ -10,6 +10,7 @@ namespace ApolloBackend.Interfaces
         Task<List<DocumentVente>> GetDocumentVentesByTiers(string tiersCode);
 
         Task<DocumentVente> CreateDocumentVente(DocumentVenteDto documentVenteDto);
+        Task<DocumentVente> GetDocumentByPieceCode(string PieceCode);
 
     }
 }

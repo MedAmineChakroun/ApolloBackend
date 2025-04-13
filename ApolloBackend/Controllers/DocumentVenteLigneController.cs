@@ -29,5 +29,11 @@ namespace ApolloBackend.Controllers
             var newLigne = await _documentVenteLigneService.createDocumentVenteLigne(documentVenteligneDto);
             return Ok(newLigne);
         }
+        [HttpGet("piece/nb/{docPiece}")]
+        public async Task<ActionResult<int>> GetDocumentVenteLigneNbByPiece(string docPiece)
+        {
+            var lignes = await _documentVenteLigneService.getByDocumentVenteLignePiece(docPiece);
+            return Ok(lignes.Count); 
+        }
     }
 }

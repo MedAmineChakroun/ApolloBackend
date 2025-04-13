@@ -33,7 +33,16 @@ namespace ApolloBackend.Controllers
             if (client == null) return NotFound();
             return client;
         }
-
+        [HttpGet("code/{tiersCode}")]
+        public async Task<ActionResult<Client>> GetByTiersCode(string tiersCode)
+        {
+            var query = _db.Clients.AsQueryable();
+            if (!string.IsNullOrEmpty(tiersCode))
+            {
+                query = query.Where(c => c.TiersCode == tiersCode);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, ClientUpdateRequestDto dto)
         {

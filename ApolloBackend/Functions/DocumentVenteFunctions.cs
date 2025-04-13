@@ -40,7 +40,15 @@ namespace ApolloBackend.Functions
             await _context.SaveChangesAsync();
             return DocumentVente;
         }
-      
+        public async Task<DocumentVente> GetDocumentByPieceCode(string PieceCode)
+        {
+            var query = _context.DocumentVentes.AsQueryable();
+            if (!string.IsNullOrEmpty(PieceCode))
+            {
+                query = query.Where(p => p.DocPiece == PieceCode);
+            }
+            return await query.FirstOrDefaultAsync();
+        }
 
 
     }
