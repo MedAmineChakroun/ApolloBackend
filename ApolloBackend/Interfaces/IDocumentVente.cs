@@ -11,6 +11,7 @@ namespace ApolloBackend.Interfaces
 
         Task<DocumentVente> CreateDocumentVente(DocumentVenteDto documentVenteDto);
         Task<DocumentVente> GetDocumentByPieceCode(string PieceCode);
-
+        Task<int> GetNbCommande();
+        Task<int> GetNbCommandeAddedLastweek();
     }
 }

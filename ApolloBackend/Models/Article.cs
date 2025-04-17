@@ -26,5 +26,6 @@ namespace ApolloBackend.Models
         public decimal? ArtTvaTaux { get; set; }
 
 
+
     }
 }

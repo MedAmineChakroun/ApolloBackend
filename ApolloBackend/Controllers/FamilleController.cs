@@ -1,5 +1,6 @@
 ﻿using ApolloBackend.Entities;
 using ApolloBackend.Functions;
+using ApolloBackend.Models;
 using ApolloBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,15 @@ namespace ApolloBackend.Controllers
             _familleFunctions = famille;
         }
         [HttpGet]
-        public async Task<ActionResult<List<ListeFamille>>> GetFamilles()
+        public async Task<ActionResult<List<Famille>>> GetFamilles()
         {
             return await _familleFunctions.GetFamilles();
+        }
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCount()
+        {
+            var count = await _familleFunctions.GetNbFamilles();
+            return Ok(count);
         }
     }
 }

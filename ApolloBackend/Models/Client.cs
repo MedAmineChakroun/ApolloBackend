@@ -18,5 +18,8 @@
 
         public string? TiersTel1 { get; set; }
 
+        public int TiersFlag { get; set; }
+        public DateTime? TiersDateCreate { get; set; }
+
     }
 }

@@ -13,6 +13,7 @@ namespace ApolloBackend.Models
         // Foreign keys (only one will be used per user)
         public int? ClientId { get; set; }
         public virtual Client? Client { get; set; }
+
     }
 
 }

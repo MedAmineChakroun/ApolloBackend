@@ -16,7 +16,7 @@ namespace ApolloBackend.Functions
         }
         public async Task<List<Article>> GetProduits()
         {
-          return  await _context.Articles.ToListAsync();
+            return await _context.Articles.ToListAsync();
         }
 
         public async Task<Article> GetProduitById(int id)
@@ -42,6 +42,20 @@ namespace ApolloBackend.Functions
 
             return await query.ToListAsync();
         }
-
+        public async Task<int> GetNbProduits()
+        {
+            return await _context.Articles.CountAsync();
+        }
+        public async Task<Article> GetProduitByCode(string code)
+        {
+            var produit = await _context.Articles.AsQueryable()
+                .Where(p => p.ArtCode == code)
+                .FirstOrDefaultAsync();
+            if (produit == null)
+            {
+                return null;
+            }
+            return produit;
+        }
     }
 }

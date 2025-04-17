@@ -52,7 +52,9 @@ namespace ApolloBackend.Controllers
                 TiersCodePostal = requestDto.PostalCode,
                 TiersVille = requestDto.City,
                 TiersPays = requestDto.Country,
-                TiersTel1 = requestDto.Phone
+                TiersTel1 = requestDto.Phone,
+                TiersFlag = 0,
+                TiersDateCreate = DateTime.Now
             };
 
             _dbContext.Clients.Add(client);
@@ -77,8 +79,9 @@ namespace ApolloBackend.Controllers
                 return BadRequest(isCreated.Errors.Select(x => x.Description).ToList());
             }
 
-            // Set customer role to auth user
-            await _userManager.AddToRoleAsync(newUser, "customer");
+            
+                // Set customer role to auth user
+                await _userManager.AddToRoleAsync(newUser, "customer");
 
             // Generate token
             return Ok(new RegistrationRequestResponse()
@@ -107,6 +110,7 @@ namespace ApolloBackend.Controllers
                 Token = token,
                 Result = true
             });
+
         }
 
         private async Task<string> GenerateJwtTokenAsync(User user)

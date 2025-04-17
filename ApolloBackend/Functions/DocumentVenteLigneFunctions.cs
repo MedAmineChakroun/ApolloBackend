@@ -13,6 +13,10 @@ namespace ApolloBackend.Functions
         {
             _context = context;
         }
+        public async Task<List<DocumentVenteLigne>> getDocumentVenteLignes()
+        {
+            return await _context.DocumentVenteLignes.ToListAsync();
+        }
         public async Task<List<DocumentVenteLigne>> getByDocumentVenteLignePiece(string docPiece)
         {
             var lignes = await _context.DocumentVenteLignes
@@ -37,6 +41,27 @@ namespace ApolloBackend.Functions
             await _context.SaveChangesAsync();
             return ligne;
         }
+        public async Task<int> GetLignesNb()
+        {
+            return await _context.DocumentVenteLignes.CountAsync();
+        }
+        public async Task<List<DocumentVenteLigne>> getTopDocumentVenteLignes()
+        {
+            var lignes = await _context.DocumentVenteLignes
+                .OrderByDescending(l => l.LigneDocPiece) // or use a date field if available
+                .ToListAsync();
+
+            // Distinct by LigneArtCode, keeping the most recent one per article
+            var topDistinctLignes = lignes
+                .GroupBy(l => l.LigneArtCode)
+                .Select(g => g.First())
+                .Take(10)
+                .ToList();
+
+            return topDistinctLignes;
+        }
+
+
     }
 
 }

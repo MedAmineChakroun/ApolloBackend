@@ -9,7 +9,7 @@ namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+  
     public class DocumentVenteController : ControllerBase
     {
         private readonly IDocumentVente _documentVenteService;
@@ -45,6 +45,17 @@ namespace ApolloBackend.Controllers
             }
             return Ok(documentVente);
         }
-
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetNbDocumentVentes()
+        {
+            var nbDocumentVentes = await _documentVenteService.GetNbCommande();
+            return Ok(nbDocumentVentes);
+        }
+        [HttpGet("count/thisWeek")]
+        public async Task<ActionResult<int>> GetNbCommandeAddedLastweek()
+        {
+            var nbDocumentVentes = await _documentVenteService.GetNbCommandeAddedLastweek();
+            return Ok(nbDocumentVentes);
+        }
     }
 }

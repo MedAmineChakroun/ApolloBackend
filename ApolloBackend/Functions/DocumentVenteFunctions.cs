@@ -49,8 +49,21 @@ namespace ApolloBackend.Functions
             }
             return await query.FirstOrDefaultAsync();
         }
+        public async Task<int> GetNbCommande()
+        {
+            return await _context.DocumentVentes.CountAsync();
+        }
 
+    public async Task<int> GetNbCommandeAddedLastweek()
+         {
+        // 1. Compute the cutoff datetime (7 days ago from now)
+        var oneWeekAgo = DateTime.Now.AddDays(-7);
 
+        // 2. Filter and count
+        return await _context.DocumentVentes
+                             .Where(d => d.DocDate >= oneWeekAgo)
+                             .CountAsync();
+         }
     }
 
 }

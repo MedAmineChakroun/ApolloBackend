@@ -8,5 +8,7 @@ namespace ApolloBackend.Interfaces
         Task<List<Article>> GetProduits();
         Task<Article> GetProduitById(int id);
         Task<List<Article>> GetProduitsByFamille(string famille);
+        Task<Article> GetProduitByCode(string code);
+        Task<int> GetNbProduits();
     }
 }

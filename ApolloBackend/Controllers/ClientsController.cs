@@ -1,6 +1,7 @@
 ﻿using ApolloBackend.Data;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace ApolloBackend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult<IEnumerable<Client>>> GetAll()
         {
             return await _db.Clients.ToListAsync();
@@ -43,7 +45,14 @@ namespace ApolloBackend.Controllers
             }
             return await query.FirstOrDefaultAsync();
         }
+        [HttpGet("count")]
+        public async Task<ActionResult> GetNbClients()
+        {
+            int count = await _db.Clients.CountAsync();
+            return Ok(count);
+        }
         [HttpPut("{id}")]
+  
         public async Task<IActionResult> Update(int id, ClientUpdateRequestDto dto)
         {
             var client = await _db.Clients.FindAsync(id);
@@ -84,6 +93,7 @@ namespace ApolloBackend.Controllers
             await _db.SaveChangesAsync();
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

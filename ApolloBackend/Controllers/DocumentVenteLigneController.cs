@@ -9,7 +9,6 @@ namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class DocumentVenteLigneController : ControllerBase
     {
         private readonly IDocumentVenteLigne _documentVenteLigneService;
@@ -35,5 +34,22 @@ namespace ApolloBackend.Controllers
             var lignes = await _documentVenteLigneService.getByDocumentVenteLignePiece(docPiece);
             return Ok(lignes.Count); 
         }
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetLignesNb()
+        {
+            var lignesNb = await _documentVenteLigneService.GetLignesNb();
+            return Ok(lignesNb);
+        }
+        [HttpGet]
+        public async Task<List<DocumentVenteLigne>> GetDocumentVenteLignes()
+        {
+            return await _documentVenteLigneService.getDocumentVenteLignes();
+        }
+        [HttpGet("top")]
+        public async Task<List<DocumentVenteLigne>> GetTopDocumentVenteLignes()
+        {
+            return await _documentVenteLigneService.getTopDocumentVenteLignes();
+        }
+
     }
 }
