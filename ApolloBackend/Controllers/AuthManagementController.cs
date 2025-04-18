@@ -54,7 +54,8 @@ namespace ApolloBackend.Controllers
                 TiersPays = requestDto.Country,
                 TiersTel1 = requestDto.Phone,
                 TiersFlag = 0,
-                TiersDateCreate = DateTime.Now
+                TiersDateCreate = DateTime.Now,
+                TiersEmail = requestDto.Email,
             };
 
             _dbContext.Clients.Add(client);

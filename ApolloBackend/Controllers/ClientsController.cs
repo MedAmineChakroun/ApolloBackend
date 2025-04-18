@@ -22,7 +22,7 @@ namespace ApolloBackend.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles ="admin")]
+      //  [Authorize(Roles ="admin")]
         public async Task<ActionResult<IEnumerable<Client>>> GetAll()
         {
             return await _db.Clients.ToListAsync();
@@ -65,6 +65,7 @@ namespace ApolloBackend.Controllers
             var trimmedCity = dto.City?.Trim();
             var trimmedCountry = dto.Country?.Trim();
             var trimmedPhone = dto.Phone?.Trim();
+         
 
             // Update client properties with trimmed values
             client.TiersIntitule = trimmedName;
@@ -73,6 +74,7 @@ namespace ApolloBackend.Controllers
             client.TiersVille = trimmedCity;
             client.TiersPays = trimmedCountry;
             client.TiersTel1 = trimmedPhone;
+            client.TiersFlag = dto.Flag;
 
             // Find and update associated user's UserName if exists
             var user = await _userManager.Users
@@ -91,6 +93,20 @@ namespace ApolloBackend.Controllers
             }
 
             await _db.SaveChangesAsync();
+            return NoContent();
+        }
+        [HttpPatch("updateFlag/{id}")]
+        public async Task<IActionResult> UpdateFlag(int id, [FromQuery] int newFlag)
+        {
+            var client = await _db.Clients.FindAsync(id);
+            if (client == null)
+            {
+                return NotFound($"Client with ID {id} not found.");
+            }
+
+            client.TiersFlag = newFlag;
+            await _db.SaveChangesAsync();
+
             return NoContent();
         }
 
@@ -121,6 +137,21 @@ namespace ApolloBackend.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("role/{id}")]
+        public async Task<IActionResult> getRole(int id)
+        {
+            var user = await _userManager.Users
+        .FirstOrDefaultAsync(u => u.ClientId == id);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            // Get roles for the user
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(new { UserId = user.Id, Roles = roles });
+        }
     }
 }
 public class ClientUpdateRequestDto
@@ -131,4 +162,6 @@ public class ClientUpdateRequestDto
     public string? City { get; set; }
     public string? Country { get; set; }
     public string? Phone { get; set; }
+
+    public int Flag { get; set; }
 }

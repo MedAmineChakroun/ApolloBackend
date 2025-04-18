@@ -33,6 +33,9 @@ namespace ApolloBackend.Controllers
         public async Task<ActionResult<DocumentVente>> CreateDocumentVente([FromBody] DocumentVenteDto documentVenteDto)
         {
             var newDocument = await _documentVenteService.CreateDocumentVente(documentVenteDto);
+            newDocument.DocEtat = 0;
+            newDocument.DocFlag = 0; 
+            
             return Ok(newDocument);
         }
         [HttpGet("piece/{pieceCode}")]

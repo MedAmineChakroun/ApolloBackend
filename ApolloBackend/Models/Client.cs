@@ -21,5 +21,7 @@
         public int TiersFlag { get; set; }
         public DateTime? TiersDateCreate { get; set; }
 
+        public string? TiersEmail { get; set; }
+
     }
 }
