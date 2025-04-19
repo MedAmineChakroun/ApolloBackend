@@ -1,4 +1,5 @@
-﻿using ApolloBackend.Interfaces;
+﻿using ApolloBackend.Functions;
+using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -60,5 +61,31 @@ namespace ApolloBackend.Controllers
             var nbDocumentVentes = await _documentVenteService.GetNbCommandeAddedLastweek();
             return Ok(nbDocumentVentes);
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCommande(int id)
+        {
+            var result = await _documentVenteService.DeleteCommande(id);
+            if (!result)
+                return NotFound(new { message = $"No document found with ID {id}" });
+
+            return Ok(new { message = $"Document with ID {id} deleted successfully" });
+        }
+        [HttpPatch("updateEtat/{id}")]
+        public async Task<IActionResult> UpdateDocumentEtat(int id, [FromQuery] int etat, [FromQuery] string note)
+        {
+            var updated = await _documentVenteService.UpdateDocumentEtat(id, etat, note);
+
+
+            return Ok(updated);
+        }
+        [HttpPatch("updateFlag/{id}")]
+        public async Task<IActionResult> UpdateDocumentFlag(int id, [FromQuery] int flag)
+        {
+            var updated = await _documentVenteService.UpdateDocumentFlag(id, flag);
+            return Ok(updated);
+        }
+
+
+
     }
 }

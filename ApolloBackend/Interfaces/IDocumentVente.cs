@@ -1,5 +1,6 @@
 ﻿using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace ApolloBackend.Interfaces
 {
@@ -13,5 +14,10 @@ namespace ApolloBackend.Interfaces
         Task<DocumentVente> GetDocumentByPieceCode(string PieceCode);
         Task<int> GetNbCommande();
         Task<int> GetNbCommandeAddedLastweek();
+        Task<DocumentVente> UpdateDocumentEtat(int id, int etat , string note);
+        Task<DocumentVente> UpdateDocumentFlag(int id, int flag);
+
+        Task<bool> DeleteCommande(int id);
+
     }
 }

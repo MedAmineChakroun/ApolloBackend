@@ -4,6 +4,7 @@ using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ApolloBackend.Functions
 {
@@ -20,7 +21,7 @@ namespace ApolloBackend.Functions
         }
         public async Task<List<DocumentVente>> GetDocumentVentesByTiers(string tiersCode)
         {
-          var query = _context.DocumentVentes.AsQueryable();
+            var query = _context.DocumentVentes.AsQueryable();
             if (!string.IsNullOrEmpty(tiersCode))
             {
                 query = query.Where(p => p.DocTiersCode == tiersCode);
@@ -54,16 +55,50 @@ namespace ApolloBackend.Functions
             return await _context.DocumentVentes.CountAsync();
         }
 
-    public async Task<int> GetNbCommandeAddedLastweek()
-         {
-        // 1. Compute the cutoff datetime (7 days ago from now)
-        var oneWeekAgo = DateTime.Now.AddDays(-7);
+        public async Task<int> GetNbCommandeAddedLastweek()
+        {
+            // 1. Compute the cutoff datetime (7 days ago from now)
+            var oneWeekAgo = DateTime.Now.AddDays(-7);
 
-        // 2. Filter and count
-        return await _context.DocumentVentes
-                             .Where(d => d.DocDate >= oneWeekAgo)
-                             .CountAsync();
-         }
+            // 2. Filter and count
+            return await _context.DocumentVentes
+                                 .Where(d => d.DocDate >= oneWeekAgo)
+                                 .CountAsync();
+        }
+        public async Task<bool> DeleteCommande(int id)
+        {
+            var doc = await _context.DocumentVentes.FirstOrDefaultAsync(d => d.DocId == id);
+            if (doc == null)
+                return false;
+
+            _context.DocumentVentes.Remove(doc);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<DocumentVente> UpdateDocumentEtat(int id, int etat, string note)
+        {
+            var doc = await _context.DocumentVentes.FirstOrDefaultAsync(d => d.DocId == id);
+            if (doc == null)
+                return null;
+            doc.DocEtat = etat;
+            doc.DocNote = note;
+            _context.DocumentVentes.Update(doc);
+            await _context.SaveChangesAsync();
+            return doc;
+
+        }
+        public async Task<DocumentVente> UpdateDocumentFlag(int id, int flag)
+        {
+            var doc = await _context.DocumentVentes.FirstOrDefaultAsync(d => d.DocId == id);
+            if (doc == null)
+                return null;
+            doc.DocFlag = flag;
+            _context.DocumentVentes.Update(doc);
+            await _context.SaveChangesAsync();
+            return doc;
+
+
+        }
     }
 
 }
