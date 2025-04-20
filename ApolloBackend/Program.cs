@@ -43,6 +43,7 @@ builder.Services.AddScoped<FamilleFunctions>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IDocumentVente, DocumentVenteFunctions>();
 builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
+builder.Services.AddScoped<INotification, NotificationFunctions>();
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>

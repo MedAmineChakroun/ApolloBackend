@@ -1,10 +1,14 @@
-﻿using ApolloBackend.Functions;
+﻿using ApolloBackend.Data;
+using ApolloBackend.Functions;
 using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace ApolloBackend.Controllers
 {
@@ -14,10 +18,19 @@ namespace ApolloBackend.Controllers
     public class DocumentVenteController : ControllerBase
     {
         private readonly IDocumentVente _documentVenteService;
-        public DocumentVenteController(IDocumentVente documentVenteService)
+        private readonly INotification _notificationService;
+
+        public DocumentVenteController(
+    IDocumentVente documentVenteService,
+    INotification notificationservice,
+    UserManager<User> userManager,
+    AppDbContext db)
         {
             _documentVenteService = documentVenteService;
+            _notificationService = notificationservice;
+
         }
+
         [HttpGet]
         public async Task<ActionResult<List<DocumentVente>>> GetAllDocumentVentes()
         {
@@ -74,10 +87,36 @@ namespace ApolloBackend.Controllers
         public async Task<IActionResult> UpdateDocumentEtat(int id, [FromQuery] int etat, [FromQuery] string note)
         {
             var updated = await _documentVenteService.UpdateDocumentEtat(id, etat, note);
+            var tiersCode = updated.DocTiersCode;
+            var docPiece = updated.DocPiece;
 
+            string title = "";
+            string msg = "";
+            string type = "commande";
+            switch (etat)
+            {
+                case 0:
+                    title = "Commande en attente";
+                    msg = $"Votre commande #{docPiece} est en attente de traitement.";
+                    break;
+                case 1:
+                    title = "Commande acceptée";
+                    msg = $"Votre commande #{docPiece} a été acceptée et est en cours de préparation.";
+                    break;
+                case 2:
+                    title = "Commande refusée";
+                    msg = $"Votre commande #{docPiece} a été refusée. Veuillez vérifier les détails ou nous contacter.";
+                    break;
+                default:
+                    title = "Mise à jour de commande";
+                    msg = $"Votre commande #{docPiece} a été mise à jour.";
+                    break;
+            }
 
+            await _notificationService.AddNotificationAsync(tiersCode, title, msg,type);
             return Ok(updated);
         }
+
         [HttpPatch("updateFlag/{id}")]
         public async Task<IActionResult> UpdateDocumentFlag(int id, [FromQuery] int flag)
         {

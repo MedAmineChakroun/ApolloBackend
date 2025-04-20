@@ -17,6 +17,7 @@ namespace ApolloBackend.Data
         public DbSet<DocumentVente> DocumentVentes { get; set; }
         public DbSet<DocumentVenteLigne> DocumentVenteLignes { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<Notification> Notifications { get; set; } // Ajout de la DbSet pour Notification
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -126,6 +127,7 @@ namespace ApolloBackend.Data
                 .WithMany() // ou .WithMany(a => a.WishlistItems) si tu veux naviguer côté Article
                 .HasForeignKey(w => w.ArtId)
                 .OnDelete(DeleteBehavior.Cascade);
+           
         }
     }
 }
