@@ -44,6 +44,9 @@ builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IDocumentVente, DocumentVenteFunctions>();
 builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
 builder.Services.AddScoped<INotification, NotificationFunctions>();
+builder.Services.AddSignalR();
+
+
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -109,6 +112,8 @@ using (var scope = app.Services.CreateScope())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<NotificationHub>("/notificationHub")
+     .AllowAnonymous(); 
 
 app.MapControllers();
 
