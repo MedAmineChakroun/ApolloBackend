@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
+using System.Net;
 
 
 namespace ApolloBackend.Controllers
@@ -19,16 +21,16 @@ namespace ApolloBackend.Controllers
     {
         private readonly IDocumentVente _documentVenteService;
         private readonly INotification _notificationService;
+        private readonly AppDbContext _db;
 
         public DocumentVenteController(
-    IDocumentVente documentVenteService,
-    INotification notificationservice,
-    UserManager<User> userManager,
-    AppDbContext db)
+            IDocumentVente documentVenteService,
+            INotification notificationservice,
+            AppDbContext db)
         {
             _documentVenteService = documentVenteService;
             _notificationService = notificationservice;
-
+            _db = db;
         }
 
         [HttpGet]
@@ -112,7 +114,7 @@ namespace ApolloBackend.Controllers
                     msg = $"Votre commande #{docPiece} a été mise à jour.";
                     break;
             }
-
+            envoiMail(tiersCode, title, msg, type);
             await _notificationService.AddNotificationAsync(tiersCode, title, msg,type);
             return Ok(updated);
         }
@@ -124,7 +126,47 @@ namespace ApolloBackend.Controllers
             return Ok(updated);
         }
 
+        private async Task envoiMail(string tiersCode, string title, string msg, string type)
+        {
+            try
+            {
+                // Find client email from ERP
+                var client = await _db.Clients.FirstOrDefaultAsync(c => c.TiersCode == tiersCode);
+                if (client == null || string.IsNullOrWhiteSpace(client.TiersEmail))
+                    return; // No email found
+
+                var toAddress = new MailAddress(client.TiersEmail, client.TiersIntitule ?? "Client");
+                var fromAddress = new MailAddress("hbnkii2@gmail.com", "Assistance Apollo Store");
+                const string fromPassword = "cjck cnnd htvw qhfl"; 
+
+                var smtp = new SmtpClient
+                {
+                    Host = "smtp.gmail.com",
+                    Port = 587,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+                };
+
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = title,
+                    Body = msg
+                })
+                {
+                    await smtp.SendMailAsync(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to send email: " + ex.Message);
+                // Optional: log the error or silently continue
+            }
+        }
 
 
     }
+
+
 }
