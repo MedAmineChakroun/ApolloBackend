@@ -39,7 +39,6 @@ namespace ApolloBackend.Controllers
 
             if (produit == null)
             {
-                return NotFound($"Product with ID {id} not found");
             }
 
             return Ok(produit);
