@@ -17,5 +17,12 @@
         public string? DocTiersIntitule { get; set; }
 
         public int DocId { get; set; }
+
+        public int? DocEtat { get; set; }
+
+        public string? DocNote { get; set; }
+
+        public int? DocFlag{ get; set; }
+
     }
 }

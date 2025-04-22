@@ -14,6 +14,7 @@ namespace ApolloBackend.Functions
         {
             _context = context;
         }
+
         public async Task<List<Article>> GetProduits()
         {
             return await _context.Articles.ToListAsync();
@@ -21,16 +22,9 @@ namespace ApolloBackend.Functions
 
         public async Task<Article> GetProduitById(int id)
         {
-            var produit = await _context.Articles.AsQueryable()
-                .Where(p => p.ArtId == id)
-                .FirstOrDefaultAsync();
-            if (produit == null)
-            {
-                return null;
-            }
-            return produit;
-
+            return await _context.Articles.FirstOrDefaultAsync(p => p.ArtId == id);
         }
+
         public async Task<List<Article>> GetProduitsByFamille(string famille = null)
         {
             var query = _context.Articles.AsQueryable();
@@ -42,20 +36,55 @@ namespace ApolloBackend.Functions
 
             return await query.ToListAsync();
         }
+
         public async Task<int> GetNbProduits()
         {
             return await _context.Articles.CountAsync();
         }
+
         public async Task<Article> GetProduitByCode(string code)
         {
-            var produit = await _context.Articles.AsQueryable()
-                .Where(p => p.ArtCode == code)
-                .FirstOrDefaultAsync();
-            if (produit == null)
-            {
-                return null;
-            }
+            return await _context.Articles.FirstOrDefaultAsync(p => p.ArtCode == code);
+        }
+
+        // 🔽 CREATE
+        public async Task<Article> CreateProduit(Article produit)
+        {
+            _context.Articles.Add(produit);
+            await _context.SaveChangesAsync();
             return produit;
+        }
+
+        // 🔽 UPDATE
+        public async Task<Article?> UpdateProduit(Article produit)
+        {
+            var existing = await _context.Articles.FindAsync(produit.ArtId);
+            if (existing == null) return null;
+
+            // Update fields
+            existing.ArtCode = produit.ArtCode;
+            existing.ArtIntitule = produit.ArtIntitule;
+            existing.ArtFamille = produit.ArtFamille;
+            existing.ArtPrixVente = produit.ArtPrixVente;
+            existing.ArtPrixAchat = produit.ArtPrixAchat;
+            existing.ArtEtat = produit.ArtEtat;
+            existing.ArtUnite = produit.ArtUnite;
+            existing.ArtImageUrl = produit.ArtImageUrl;
+            existing.ArtTvaTaux = produit.ArtTvaTaux;
+
+            await _context.SaveChangesAsync();
+            return existing;
+        }
+
+        // 🔽 DELETE
+        public async Task<bool> DeleteProduit(int id)
+        {
+            var produit = await _context.Articles.FindAsync(id);
+            if (produit == null) return false;
+
+            _context.Articles.Remove(produit);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

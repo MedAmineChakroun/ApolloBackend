@@ -1,15 +1,14 @@
 ﻿using ApolloBackend.Functions;
+using ApolloBackend.Models; // Assuming Product model is here
 using ApolloBackend.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.AspNetCore.Authorization;
 
 namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   
+
     public class ProduitsController : ControllerBase
     {
         private readonly ProduitsFunctions _produitsFunctions;
@@ -26,10 +25,10 @@ namespace ApolloBackend.Controllers
             {
                 Data = new
                 {
-                   Produits = await _produitsFunctions.GetProduits(),
+                    Produits = await _produitsFunctions.GetProduits(),
                 },
                 IsSuccess = true,
-                Message = "" 
+                Message = ""
             };
         }
         [HttpGet("{id}")]
@@ -39,6 +38,7 @@ namespace ApolloBackend.Controllers
 
             if (produit == null)
             {
+                return NotFound($"Product with ID {id} not found");
             }
 
             return Ok(produit);
@@ -64,6 +64,39 @@ namespace ApolloBackend.Controllers
                 return NotFound($"Product with code {code} not found");
             }
             return Ok(produit);
+        }
+
+        // 🔽 Create
+        [HttpPost]
+        public async Task<IActionResult> CreateProduit([FromBody] Article produit)
+        {
+            var created = await _produitsFunctions.CreateProduit(produit);
+            return Ok(new JsonResponseData { Data = created, IsSuccess = true, Message = "Produit ajouté avec succès" });
+        }
+
+        // 🔽 Update
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduit(int id, [FromBody] Article produit)
+        {
+            if (id != produit.ArtId)
+                return BadRequest("ID mismatch");
+
+            var updated = await _produitsFunctions.UpdateProduit(produit);
+            if (updated == null)
+                return NotFound($"Produit avec ID {id} non trouvé");
+
+            return Ok(new JsonResponseData { Data = updated, IsSuccess = true, Message = "Produit mis à jour avec succès" });
+        }
+
+        // 🔽 Delete
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduit(int id)
+        {
+            var result = await _produitsFunctions.DeleteProduit(id);
+            if (!result)
+                return NotFound($"Produit avec ID {id} non trouvé");
+
+            return Ok(new JsonResponseData { IsSuccess = true, Message = "Produit supprimé avec succès" });
         }
 
     }

@@ -84,6 +84,15 @@ builder.Services.AddAuthentication(options =>
 
     };
 });
+
+
+// Dans Program.cs
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
