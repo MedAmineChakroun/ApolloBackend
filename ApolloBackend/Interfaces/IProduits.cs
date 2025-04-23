@@ -13,5 +13,7 @@ namespace ApolloBackend.Interfaces
         Task<int> GetNbProduits();
         Task<List<Article>> GetTopSellingProducts(int limit);
         Task<List<ProductWithRatingDto>> GetTopRatedProductsWithRatings(int limit);
+
+        Task<List<Article>> GetSimilarProductByCategory(string famIntitule,int limit);
     }
 }

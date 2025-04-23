@@ -91,6 +91,23 @@ namespace ApolloBackend.Controllers
                 Count = topRatedProducts.Count
             });
         }
+        [HttpGet("similar/{category}/{limit}")]
+        public async Task<IActionResult> GetSimilarByCategory([FromRoute] string category, [FromRoute] int limit)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                return BadRequest("Category (famIntitule) is required.");
+            }
+
+            var similarProducts = await _produitsFunctions.GetSimilarProductByCategory(category, limit);
+
+            if (similarProducts == null || !similarProducts.Any())
+            {
+                return NotFound("No similar products found in the given category.");
+            }
+
+            return Ok(similarProducts);
+        }
 
 
     }

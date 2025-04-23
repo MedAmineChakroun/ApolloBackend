@@ -115,6 +115,16 @@ namespace ApolloBackend.Functions
 
             return topRatedProducts;
         }
+        public async Task<List<Article>> GetSimilarProductByCategory(string famIntitule, int limit)
+        {
+            var produits = await _context.Articles
+                .Where(p => p.ArtFamille == famIntitule)
+                .Take(limit) // Apply the limit
+                .ToListAsync();
+
+            return produits;
+        }
+
     }
 
 }
