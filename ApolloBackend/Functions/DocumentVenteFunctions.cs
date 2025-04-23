@@ -37,6 +37,8 @@ namespace ApolloBackend.Functions
             DocumentVente.DocDate = DateTime.Now;
             DocumentVente.DocTht = documentVenteDto.DocTht;
             DocumentVente.DocTtc = documentVenteDto.DocTtc;
+            DocumentVente.DocEtat = 0;
+            DocumentVente.DocFlag = 0;
             _context.DocumentVentes.Add(DocumentVente);
             await _context.SaveChangesAsync();
             return DocumentVente;

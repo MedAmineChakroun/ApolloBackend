@@ -85,7 +85,6 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         RequireExpirationTime = false,
         ValidateLifetime = true,
-
     };
 });
 var app = builder.Build();

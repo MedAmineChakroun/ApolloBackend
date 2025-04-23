@@ -18,6 +18,8 @@ namespace ApolloBackend.Data
         public DbSet<DocumentVenteLigne> DocumentVenteLignes { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<Notification> Notifications { get; set; } // Ajout de la DbSet pour Notification
+        public DbSet<Rating> Ratings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -127,7 +129,20 @@ namespace ApolloBackend.Data
                 .WithMany() // ou .WithMany(a => a.WishlistItems) si tu veux naviguer côté Article
                 .HasForeignKey(w => w.ArtId)
                 .OnDelete(DeleteBehavior.Cascade);
-           
+            // Rating → Article (Product)
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.Product)
+                .WithMany() // ou .WithMany(a => a.Ratings) si navigation dans Article
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Rating → Client
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.client)
+                .WithMany() // ou .WithMany(c => c.Ratings) si navigation dans Client
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

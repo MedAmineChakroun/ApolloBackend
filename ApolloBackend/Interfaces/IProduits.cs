@@ -1,5 +1,6 @@
 ﻿using ApolloBackend.Entities;
 using ApolloBackend.Models;
+using ApolloBackend.Models.DTOs;
 
 namespace ApolloBackend.Interfaces
 {
@@ -10,5 +11,7 @@ namespace ApolloBackend.Interfaces
         Task<List<Article>> GetProduitsByFamille(string famille);
         Task<Article> GetProduitByCode(string code);
         Task<int> GetNbProduits();
+        Task<List<Article>> GetTopSellingProducts(int limit);
+        Task<List<ProductWithRatingDto>> GetTopRatedProductsWithRatings(int limit);
     }
 }

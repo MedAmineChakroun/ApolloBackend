@@ -114,7 +114,9 @@ namespace ApolloBackend.Controllers
                     msg = $"Votre commande #{docPiece} a été mise à jour.";
                     break;
             }
-            envoiMail(tiersCode, title, msg, type);
+            
+            
+            
             await _notificationService.AddNotificationAsync(tiersCode, title, msg,type);
             return Ok(updated);
         }

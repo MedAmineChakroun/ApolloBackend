@@ -9,7 +9,7 @@ namespace ApolloBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   
+
     public class ProduitsController : ControllerBase
     {
         private readonly ProduitsFunctions _produitsFunctions;
@@ -26,10 +26,10 @@ namespace ApolloBackend.Controllers
             {
                 Data = new
                 {
-                   Produits = await _produitsFunctions.GetProduits(),
+                    Produits = await _produitsFunctions.GetProduits(),
                 },
                 IsSuccess = true,
-                Message = "" 
+                Message = ""
             };
         }
         [HttpGet("{id}")]
@@ -66,6 +66,33 @@ namespace ApolloBackend.Controllers
             }
             return Ok(produit);
         }
+        [HttpGet("topsales/{limit}")]
+        public async Task<IActionResult> GetTopSales([FromRoute] int limit )
+        {
+            var topProducts = await _produitsFunctions.GetTopSellingProducts(limit);
+            if (topProducts == null || !topProducts.Any())
+            {
+                return NotFound("No sales data found");
+            }
+            return Ok(topProducts);
+        }
+        [HttpGet("toprated/{limit}")]
+        public async Task<IActionResult> GetTopRated([FromRoute] int limit )
+        {
+            var topRatedProducts = await _produitsFunctions.GetTopRatedProductsWithRatings(limit);
+            if (topRatedProducts == null || !topRatedProducts.Any())
+            {
+                return NotFound("No rated products found");
+            }
+
+            return Ok(new
+            {
+                Products = topRatedProducts,
+                Count = topRatedProducts.Count
+            });
+        }
+
 
     }
+
 }
