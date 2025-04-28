@@ -44,6 +44,7 @@ builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IDocumentVente, DocumentVenteFunctions>();
 builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
 builder.Services.AddScoped<INotification, NotificationFunctions>();
+builder.Services.AddScoped<IStock, StockFunctions>();
 builder.Services.AddSignalR();
 
 

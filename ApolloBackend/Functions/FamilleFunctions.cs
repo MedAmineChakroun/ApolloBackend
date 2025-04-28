@@ -8,20 +8,20 @@ namespace ApolloBackend.Functions
 {
     public class FamilleFunctions : IFamille
     {
-        private readonly AppDbContext _context;
+        private readonly ERPContext _Erpcontext;
 
-        public FamilleFunctions(AppDbContext context)
+        public FamilleFunctions(ERPContext ERPContext)
         {
-            _context = context;
+            _Erpcontext = ERPContext;
         }
 
-        public async Task<List<Famille>> GetFamilles()
+        public async Task<List<ListeFamille>> GetFamilles()
         {
-            return await _context.Familles.ToListAsync();
+            return await _Erpcontext.ListeFamilles.ToListAsync();
         }
         public async Task<int> GetNbFamilles()
         {
-            return await _context.Familles.CountAsync();
+            return await _Erpcontext.ListeFamilles.CountAsync();
         }
     }
 }

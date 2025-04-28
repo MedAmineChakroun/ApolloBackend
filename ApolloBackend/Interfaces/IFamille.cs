@@ -5,7 +5,7 @@ namespace ApolloBackend.Interfaces
 {
     public interface IFamille
     {
-        Task<List<Famille>> GetFamilles();
+        Task<List<ListeFamille>> GetFamilles();
         Task<int> GetNbFamilles();
     }
 }

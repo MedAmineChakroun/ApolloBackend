@@ -16,7 +16,7 @@ namespace ApolloBackend.Controllers
             _familleFunctions = famille;
         }
         [HttpGet]
-        public async Task<ActionResult<List<Famille>>> GetFamilles()
+        public async Task<ActionResult<List<ListeFamille>>> GetFamilles()
         {
             return await _familleFunctions.GetFamilles();
         }

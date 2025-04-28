@@ -28,6 +28,8 @@ public partial class ERPContext : DbContext
 
     public virtual DbSet<ListeFamille> ListeFamilles { get; set; }
 
+    public virtual DbSet<ListeStock> ListeStocks { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=DESKTOP-QD57IO2\\SQLEXPRESS;Database=ALLANI;Trusted_Connection=True;TrustServerCertificate=true;");
@@ -298,6 +300,21 @@ public partial class ERPContext : DbContext
                 .HasMaxLength(69)
                 .IsUnicode(false)
                 .HasColumnName("FAM_INTITULE");
+        });
+
+        modelBuilder.Entity<ListeStock>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("LISTE_STOCK");
+
+            entity.Property(e => e.ArRef)
+                .HasMaxLength(19)
+                .IsUnicode(false)
+                .HasColumnName("AR_Ref");
+            entity.Property(e => e.AsQteSto)
+                .HasColumnType("numeric(24, 6)")
+                .HasColumnName("AS_QteSto");
         });
 
         OnModelCreatingPartial(modelBuilder);
