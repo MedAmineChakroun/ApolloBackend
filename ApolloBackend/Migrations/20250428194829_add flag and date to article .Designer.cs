@@ -4,6 +4,7 @@ using ApolloBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApolloBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250428194829_add flag and date to article ")]
+    partial class addflaganddatetoarticle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace ApolloBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArtId"), 100000L);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArtId"));
 
                     b.Property<string>("ArtCode")
                         .IsRequired()
@@ -93,7 +96,7 @@ namespace ApolloBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TiersId"), 100000L);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TiersId"));
 
                     b.Property<string>("TiersAdresse1")
                         .HasColumnType("nvarchar(max)");
@@ -143,7 +146,7 @@ namespace ApolloBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocId"), 100000L);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocId"));
 
                     b.Property<DateTime?>("DocDate")
                         .HasColumnType("datetime2");
@@ -193,7 +196,7 @@ namespace ApolloBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LigneId"), 100000L);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LigneId"));
 
                     b.Property<string>("LigneArtCode")
                         .HasColumnType("nvarchar(max)");
@@ -231,7 +234,7 @@ namespace ApolloBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FamId"), 100000L);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FamId"));
 
                     b.Property<string>("FamCode")
                         .IsRequired()

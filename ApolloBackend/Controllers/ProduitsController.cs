@@ -1,4 +1,6 @@
 ﻿using ApolloBackend.Functions;
+using ApolloBackend.Models;
+using ApolloBackend.Models.DTOs;
 using ApolloBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,7 +110,37 @@ namespace ApolloBackend.Controllers
 
             return Ok(similarProducts);
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateProduit([FromBody] ArticleDto articledto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var createdProduit = await _produitsFunctions.CreateProduit(articledto);
+            return Ok(createdProduit);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduit(int id, [FromBody] Article article)
+        {
+            if (id != article.ArtId)
+                return BadRequest("Product ID mismatch");
+
+            var updatedProduitsuccess = await _produitsFunctions.UpdateProduit(article);
+         
+
+            return Ok(updatedProduitsuccess);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduit(int id)
+        {
+            var success = await _produitsFunctions.DeleteProduit(id);
+            if (!success)
+                return NotFound($"Product with ID {id} not found");
+
+            return NoContent();
+        }
 
     }
 

@@ -57,6 +57,9 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<Client>(entity =>
             {
                 entity.HasKey(e => e.TiersId);
+                entity.Property(e => e.TiersId)
+                .UseIdentityColumn(seed: 100000, increment: 1);
+
                 entity.Property(e => e.TiersCode)
                     .IsRequired()
                     .HasMaxLength(10)
@@ -74,6 +77,9 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<Article>(entity =>
             {
                 entity.HasKey(e => e.ArtId);
+                entity.Property(e => e.ArtId)
+               .UseIdentityColumn(seed: 100000, increment: 1);
+
                 entity.Property(e => e.ArtCode)
                     .IsRequired()
                     .HasMaxLength(10)
@@ -85,6 +91,9 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<Famille>(entity =>
             {
                 entity.HasKey(e => e.FamId);
+                entity.Property(e => e.FamId)
+               .UseIdentityColumn(seed: 100000, increment: 1);
+
                 entity.Property(e => e.FamCode)
                     .IsRequired()
                     .HasMaxLength(10)
@@ -96,6 +105,9 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<DocumentVente>(entity =>
             {
                 entity.HasKey(e => e.DocId);
+                entity.Property(e => e.DocId)
+               .UseIdentityColumn(seed: 100000, increment: 1);
+
                 entity.Property(e => e.DocPiece)
                     .IsRequired()
                     .HasMaxLength(10)
@@ -107,6 +119,9 @@ namespace ApolloBackend.Data
             modelBuilder.Entity<DocumentVenteLigne>(entity =>
             {
                 entity.HasKey(e => e.LigneId);
+                entity.Property(e => e.LigneId)
+                .UseIdentityColumn(seed: 100000, increment: 1);
+
                 entity.Property(e => e.LigneDocPiece)
                     .IsRequired()
                     .HasMaxLength(10);

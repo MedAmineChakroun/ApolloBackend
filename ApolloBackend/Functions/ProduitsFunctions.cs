@@ -124,7 +124,59 @@ namespace ApolloBackend.Functions
 
             return produits;
         }
+        public async Task<Article> CreateProduit(ArticleDto articleDto)
+        {
+            var article = new Article
+            {
+                ArtIntitule = articleDto.ArtIntitule,
+                ArtFamille = articleDto.ArtFamille,
+                ArtPrixVente = articleDto.ArtPrixVente,
+                ArtPrixAchat = articleDto.ArtPrixAchat,
+                ArtImageUrl = articleDto.ArtImageUrl,
+                ArtTvaTaux = articleDto.ArtTvaTaux,
+                ArtUnite = articleDto.ArtUnite,
+                ArtFlag = 0,
+                ArtEtat = 0,
+                ArtDateCreate = DateTime.Now
+            };
+            
+            _context.Articles.Add(article);
+            await _context.SaveChangesAsync();
+            return article;
+        }
 
+        public async Task<Article> UpdateProduit(Article article)
+        {
+            var existingArticle = await _context.Articles.FindAsync(article.ArtId);
+            if (existingArticle == null)
+                return null;
+
+            existingArticle.ArtIntitule = article.ArtIntitule;
+            existingArticle.ArtFamille = article.ArtFamille;
+            existingArticle.ArtPrixVente = article.ArtPrixVente;
+            existingArticle.ArtPrixAchat = article.ArtPrixAchat;
+            existingArticle.ArtEtat = article.ArtEtat;
+            existingArticle.ArtUnite = article.ArtUnite;
+            existingArticle.ArtImageUrl = article.ArtImageUrl;
+            existingArticle.ArtTvaTaux = article.ArtTvaTaux;
+            existingArticle.ArtFlag = article.ArtFlag;
+            // Don't touch ArtCode or ArtDateCreate
+
+            _context.Articles.Update(existingArticle);
+            await _context.SaveChangesAsync();
+            return existingArticle;
+        }
+
+        public async Task<bool> DeleteProduit(int id)
+        {
+            var article = await _context.Articles.FindAsync(id);
+            if (article == null)
+                return false;
+
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 
 }

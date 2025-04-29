@@ -15,5 +15,8 @@ namespace ApolloBackend.Interfaces
         Task<List<ProductWithRatingDto>> GetTopRatedProductsWithRatings(int limit);
 
         Task<List<Article>> GetSimilarProductByCategory(string famIntitule,int limit);
+        Task<Article> CreateProduit(ArticleDto articleDto);
+        Task<Article> UpdateProduit(Article article);
+        Task<bool> DeleteProduit(int id);
     }
 }

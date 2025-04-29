@@ -25,8 +25,9 @@ namespace ApolloBackend.Models
 
         public decimal? ArtTvaTaux { get; set; }
 
+        public int ArtFlag { get; set; } = 0;
 
-
+        public DateTime ArtDateCreate { get; set; }
 
     }
 }
