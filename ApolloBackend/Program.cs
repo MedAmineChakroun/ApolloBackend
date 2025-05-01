@@ -9,6 +9,7 @@ using System.Text;
 using ApolloBackend.Services;
 using ApolloBackend.Functions;
 using ApolloBackend.Interfaces;
+using Microsoft.AspNetCore.Http.Features;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<ERPContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ErpConnection")));
+
 
 
 // Add CORS Policy
