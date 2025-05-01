@@ -115,10 +115,14 @@ namespace ApolloBackend.Controllers
                     break;
             }
             
-            
-            
-            await _notificationService.AddNotificationAsync(tiersCode, title, msg,type);
+                
+        
+
+            await _notificationService.AddNotificationAsync(tiersCode, title, msg, type);
+            _ = Task.Run(() => envoiMail(tiersCode, title, msg, type));
             return Ok(updated);
+            
+         
         }
 
         [HttpPatch("updateFlag/{id}")]
@@ -135,11 +139,23 @@ namespace ApolloBackend.Controllers
                 // Find client email from ERP
                 var client = await _db.Clients.FirstOrDefaultAsync(c => c.TiersCode == tiersCode);
                 if (client == null || string.IsNullOrWhiteSpace(client.TiersEmail))
-                    return; // No email found
+                    return; // No email found, just exit silently
+
+                // Validate email address format
+                try
+                {
+                    var emailAddress = new MailAddress(client.TiersEmail);
+                }
+                catch
+                {
+                    // Invalid email format, just exit silently
+                    Console.WriteLine($"Invalid email format for client {tiersCode}: {client.TiersEmail}");
+                    return;
+                }
 
                 var toAddress = new MailAddress(client.TiersEmail, client.TiersIntitule ?? "Client");
                 var fromAddress = new MailAddress("hbnkii2@gmail.com", "Assistance Apollo Store");
-                const string fromPassword = "cjck cnnd htvw qhfl"; 
+                const string fromPassword = "cjck cnnd htvw qhfl";
 
                 var smtp = new SmtpClient
                 {
@@ -148,25 +164,39 @@ namespace ApolloBackend.Controllers
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+                    Credentials = new NetworkCredential(fromAddress.Address, fromPassword),
+                    Timeout = 10000 // 10 second timeout to prevent hanging
                 };
 
                 using (var message = new MailMessage(fromAddress, toAddress)
                 {
                     Subject = title,
-                    Body = msg
+                    Body = msg,
+                    IsBodyHtml = false
                 })
                 {
-                    await smtp.SendMailAsync(message);
+                    // Use a task with timeout to prevent blocking indefinitely
+                    var sendTask = smtp.SendMailAsync(message);
+
+                    // Wait for the task to complete or timeout after 15 seconds
+                    if (await Task.WhenAny(sendTask, Task.Delay(15000)) == sendTask)
+                    {
+                        // Email sent successfully
+                        Console.WriteLine($"Email sent successfully to {client.TiersEmail}");
+                    }
+                    else
+                    {
+                        // Email sending timed out
+                        Console.WriteLine($"Email sending timed out for {client.TiersEmail}");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to send email: " + ex.Message);
-                // Optional: log the error or silently continue
+                // Log the exception but don't throw - allow the application to continue
+                Console.WriteLine($"Failed to send email: {ex.Message}");
             }
         }
-
 
     }
 
