@@ -10,18 +10,44 @@ using ApolloBackend.Services;
 using ApolloBackend.Functions;
 using ApolloBackend.Interfaces;
 using Microsoft.AspNetCore.Http.Features;
+// Add these new using statements for App.Metrics
+using App.Metrics;
+using App.Metrics.Formatters.Prometheus;
+using App.Metrics.Formatters;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure App.Metrics
+var metrics = AppMetrics.CreateDefaultBuilder()
+    .OutputMetrics.AsPrometheusPlainText()
+    .OutputMetrics.AsPrometheusProtobuf()
+    .Build();
+
+builder.Services.AddMetrics(metrics);
+builder.Services.AddMetricsTrackingMiddleware();
+builder.Services.AddMetricsEndpoints(options =>
+{
+    // Remove the line causing the error
+    // options.MetricsEndpointPath = "/api/metrics";
+
+    // Use the correct property or method to configure the endpoint path
+    options.MetricsEndpointEnabled = true;
+    options.MetricsTextEndpointEnabled = true;
+    options.EnvironmentInfoEndpointEnabled = true;
+
+    options.MetricsEndpointOutputFormatter = metrics.OutputMetricsFormatters.GetType<MetricsPrometheusTextOutputFormatter>();
+    options.MetricsTextEndpointOutputFormatter = metrics.OutputMetricsFormatters.GetType<MetricsPrometheusTextOutputFormatter>();
+
+    // If you need to customize the endpoint path, you may need to check the documentation
+    // of the App.Metrics library for the correct way to achieve this.
+});
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<ERPContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ErpConnection")));
-
-
 
 // Add CORS Policy
 builder.Services.AddCors(options =>
@@ -48,8 +74,6 @@ builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
 builder.Services.AddScoped<INotification, NotificationFunctions>();
 builder.Services.AddScoped<IStock, StockFunctions>();
 builder.Services.AddSignalR();
-
-
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -101,10 +125,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngularApp");
 
+
+app.UseMetricsAllMiddleware();
+
+
+app.UseMetricsAllEndpoints();
+
 app.UseHttpsRedirection();
 
-//set application Roles 
-// Inside `app.UseHttpsRedirection()
+
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
@@ -115,8 +144,8 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<NotificationHub>("/notificationHub")
-     .AllowAnonymous(); 
+     .AllowAnonymous();
 
-app.MapControllers();
+app.MapControllers(); 
 
 app.Run();

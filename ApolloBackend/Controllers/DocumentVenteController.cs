@@ -119,7 +119,7 @@ namespace ApolloBackend.Controllers
         
 
             await _notificationService.AddNotificationAsync(tiersCode, title, msg, type);
-            _ = Task.Run(() => envoiMail(tiersCode, title, msg, type));
+            envoiMail(tiersCode, title, msg, type);
             return Ok(updated);
             
          
@@ -136,19 +136,17 @@ namespace ApolloBackend.Controllers
         {
             try
             {
-                // Find client email from ERP
                 var client = await _db.Clients.FirstOrDefaultAsync(c => c.TiersCode == tiersCode);
                 if (client == null || string.IsNullOrWhiteSpace(client.TiersEmail))
-                    return; // No email found, just exit silently
-
-                // Validate email address format
-                try
                 {
-                    var emailAddress = new MailAddress(client.TiersEmail);
+                    Console.WriteLine($"Client not found or email missing for tiersCode: {tiersCode}");
+                    return;
                 }
+
+                // Validate email format
+                try { var testEmail = new MailAddress(client.TiersEmail); }
                 catch
                 {
-                    // Invalid email format, just exit silently
                     Console.WriteLine($"Invalid email format for client {tiersCode}: {client.TiersEmail}");
                     return;
                 }
@@ -156,6 +154,21 @@ namespace ApolloBackend.Controllers
                 var toAddress = new MailAddress(client.TiersEmail, client.TiersIntitule ?? "Client");
                 var fromAddress = new MailAddress("hbnkii2@gmail.com", "Assistance Apollo Store");
                 const string fromPassword = "cjck cnnd htvw qhfl";
+
+                // Build HTML content
+                string htmlBody = $@"
+            <html>
+                <body style='font-family: Arial, sans-serif; font-size: 14px; color: #333;'>
+                    <p>Bonjour <strong>{client.TiersIntitule ?? "Client"}</strong>,</p>
+                    <p>{msg}</p>
+                    <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+                    <br />
+                    <p style='color: #555;'>Cordialement,</p>
+                    <p><strong>Assistance Apollo Store</strong><br />📧 scsi@contact.com<br />📞 +216 99 039 892</p>
+                    <hr style='border: none; border-top: 1px solid #ccc;' />
+                    <p style='font-size: 12px; color: #888;'>Ceci est un message automatique. Merci de ne pas y répondre.</p>
+                </body>
+            </html>";
 
                 var smtp = new SmtpClient
                 {
@@ -165,36 +178,32 @@ namespace ApolloBackend.Controllers
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
                     Credentials = new NetworkCredential(fromAddress.Address, fromPassword),
-                    Timeout = 10000 // 10 second timeout to prevent hanging
+                    Timeout = 10000
                 };
 
-                using (var message = new MailMessage(fromAddress, toAddress)
+                using var message = new MailMessage(fromAddress, toAddress)
                 {
                     Subject = title,
-                    Body = msg,
-                    IsBodyHtml = false
-                })
-                {
-                    // Use a task with timeout to prevent blocking indefinitely
-                    var sendTask = smtp.SendMailAsync(message);
+                    Body = htmlBody,
+                    IsBodyHtml = true
+                };
 
-                    // Wait for the task to complete or timeout after 15 seconds
-                    if (await Task.WhenAny(sendTask, Task.Delay(15000)) == sendTask)
-                    {
-                        // Email sent successfully
-                        Console.WriteLine($"Email sent successfully to {client.TiersEmail}");
-                    }
-                    else
-                    {
-                        // Email sending timed out
-                        Console.WriteLine($"Email sending timed out for {client.TiersEmail}");
-                    }
+                // Optionally add a Reply-To or BCC
+                // message.ReplyToList.Add("support@apollostore.com");
+
+                var sendTask = smtp.SendMailAsync(message);
+                if (await Task.WhenAny(sendTask, Task.Delay(15000)) == sendTask)
+                {
+                    Console.WriteLine($"✅ Email successfully sent to {client.TiersEmail}");
+                }
+                else
+                {
+                    Console.WriteLine($"⏱ Email sending timed out for {client.TiersEmail}");
                 }
             }
             catch (Exception ex)
             {
-                // Log the exception but don't throw - allow the application to continue
-                Console.WriteLine($"Failed to send email: {ex.Message}");
+                Console.WriteLine($"❌ Failed to send email to client {tiersCode}: {ex.Message}");
             }
         }
 
