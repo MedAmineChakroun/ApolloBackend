@@ -101,6 +101,26 @@ namespace ApolloBackend.Functions
 
 
         }
+
+        public async Task<bool> UpdateDocumentVente(int id, DocumentVenteDto dto)
+        {
+            var document = await _context.DocumentVentes.FindAsync(id);
+            if (document == null)
+                return false;
+
+            // Mise à jour des champs depuis le DTO
+            document.DocTiersCode = dto.DocTiersCode;
+            document.DocTiersIntitule = dto.DocTiersIntitule;
+            document.DocTht = dto.DocTht;
+            document.DocTtc = dto.DocTtc;
+
+            _context.DocumentVentes.Update(document);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
     }
 
 }

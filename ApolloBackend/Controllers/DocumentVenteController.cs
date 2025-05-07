@@ -132,6 +132,19 @@ namespace ApolloBackend.Controllers
             return Ok(updated);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDocumentVente(int id, [FromBody] DocumentVenteDto dto)
+        {
+            var updated = await _documentVenteService.UpdateDocumentVente(id, dto);
+            if (!updated)
+            {
+                return NotFound();
+            }
+            return NoContent(); // Ou return Ok() si tu veux renvoyer un résultat
+        }
+
+
+
         private async Task envoiMail(string tiersCode, string title, string msg, string type)
         {
             try

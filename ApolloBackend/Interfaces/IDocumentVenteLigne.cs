@@ -11,6 +11,9 @@ namespace ApolloBackend.Interfaces
         Task<DocumentVenteLigne> createDocumentVenteLigne(DocumentVenteLigneDto documentVenteligneDto);
         Task<int> GetLignesNb();
         Task<List<DocumentVenteLigne>> getTopDocumentVenteLignes();
+        Task<bool> deleteDocumentVenteLigne(int id);
+        Task<bool> UpdateDocumentVenteLigne(int id, DocumentVenteLigneDto dto);
+
     }
 
 }
