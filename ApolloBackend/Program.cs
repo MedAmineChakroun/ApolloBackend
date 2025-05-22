@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http.Features;
 using App.Metrics;
 using App.Metrics.Formatters.Prometheus;
 using App.Metrics.Formatters;
+using StackExchange.Redis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,10 @@ builder.Services.AddScoped<IDocumentVenteLigne, DocumentVenteLigneFunctions>();
 builder.Services.AddScoped<INotification, NotificationFunctions>();
 builder.Services.AddScoped<IStock, StockFunctions>();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IClients, ClientsFunctions>();
+builder.Services.AddScoped<ISynchronisationSage, SynchronisationSageFunctions>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
+
 //auths and jwt configs
 // Add Identity with custom User class
 builder.Services.AddIdentity<User, IdentityRole>(options =>

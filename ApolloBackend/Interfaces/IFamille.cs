@@ -7,5 +7,9 @@ namespace ApolloBackend.Interfaces
     {
         Task<List<ListeFamille>> GetFamilles();
         Task<int> GetNbFamilles();
+
+        Task<ListeFamille> GetFamilleByIntitule(string id);
+   
+   
     }
 }

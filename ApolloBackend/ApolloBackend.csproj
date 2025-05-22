@@ -4,7 +4,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <COMReference Include="Objets100cLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>10</VersionMinor>
+      <VersionMajor>10</VersionMajor>
+      <Guid>8b42efd1-11de-4af5-8f95-2901702d7a46</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="App.Metrics.AspNetCore.Core" Version="4.3.0" />
@@ -23,6 +36,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.37" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 

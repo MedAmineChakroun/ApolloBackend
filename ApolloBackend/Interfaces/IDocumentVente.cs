@@ -18,6 +18,8 @@ namespace ApolloBackend.Interfaces
         Task<DocumentVente> UpdateDocumentFlag(int id, int flag);
 
         Task<bool> DeleteCommande(int id);
+        Task<bool> UpdateDocumentVente(int id, DocumentVenteDto dto);
+
 
     }
 }

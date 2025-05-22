@@ -5,16 +5,19 @@ using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using StackExchange.Redis;
+using System.Text.Json;
 
 namespace ApolloBackend.Functions
 {
     public class ProduitsFunctions : IProduits
     {
         private readonly AppDbContext _context;
-
-        public ProduitsFunctions(AppDbContext context)
+        private readonly IDatabase _redis;
+        public ProduitsFunctions(AppDbContext context, IConnectionMultiplexer redis)
         {
             _context = context;
+            _redis = redis.GetDatabase();
         }
         public async Task<List<Article>> GetProduits()
         {
@@ -175,6 +178,146 @@ namespace ApolloBackend.Functions
 
             _context.Articles.Remove(article);
             await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<List<Article>> GetRecommendations(string tiersCode, int limit)
+        {
+            string cacheKey = $"recommendations:{tiersCode}:{limit}";
+
+            // Try to get from Redis cache first
+            var cached = await _redis.StringGetAsync(cacheKey);
+            if (!cached.IsNullOrEmpty)
+            {
+                var cachedArticles = JsonSerializer.Deserialize<List<Article>>(cached);
+                return cachedArticles;
+            }
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"http://localhost:5000/recommend?user_id={tiersCode}&n={limit}");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Failed to get recommendations from Python model");
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            var jsonObject = JsonDocument.Parse(jsonString);
+            var itemIds = jsonObject.RootElement
+                                    .GetProperty("recommendations")
+                                    .EnumerateArray()
+                                    .Select(x => x.GetProperty("item_id").GetString())
+                                    .ToList();
+
+            var recommendedArticles = new List<Article>();
+
+            foreach (var code in itemIds)
+            {
+                string articleCacheKey = $"article:{code}";
+
+                // Try to get article from Redis
+                var cachedArticle = await _redis.StringGetAsync(articleCacheKey);
+                if (!cachedArticle.IsNullOrEmpty)
+                {
+                    var article = JsonSerializer.Deserialize<Article>(cachedArticle);
+                    recommendedArticles.Add(article);
+                }
+                else
+                {
+                    var article = await _context.Articles.FirstOrDefaultAsync(a => a.ArtCode == code);
+                    if (article != null)
+                    {
+                        recommendedArticles.Add(article);
+                        await _redis.StringSetAsync(articleCacheKey, JsonSerializer.Serialize(article), TimeSpan.FromHours(1));
+                    }
+                }
+            }
+
+            // Maintain original recommendation order
+            recommendedArticles = recommendedArticles
+                .OrderBy(a => itemIds.IndexOf(a.ArtCode))
+                .ToList();
+
+            // Cache the entire list for 30 minutes
+            await _redis.StringSetAsync(cacheKey, JsonSerializer.Serialize(recommendedArticles), TimeSpan.FromMinutes(30));
+
+            return recommendedArticles;
+        }
+        public async Task<List<Article>> GetProduitsByCodesLimited(List<string> codes, int count)
+        {
+            string cacheKey = $"cart-recommendations:{string.Join("-", codes)}:{count}";
+            // Try Redis cache
+            var cached = await _redis.StringGetAsync(cacheKey);
+            if (!cached.IsNullOrEmpty)
+            {
+                return JsonSerializer.Deserialize<List<Article>>(cached);
+            }
+
+            // Prepare request to Python model
+            var requestBody = new
+            {
+                item_ids = codes,
+                count = count
+            };
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsync("http://localhost:5001/api/recommend/cart", content);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("Failed to get cart recommendations from Python model");
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var jsonObject = JsonDocument.Parse(jsonString);
+
+            // Extract item IDs directly from the "recommendations" array which contains strings
+            var itemIds = jsonObject.RootElement
+                                .GetProperty("recommendations")
+                                .EnumerateArray()
+                                .Select(x => x.GetString())
+                                .Where(id => id != null)
+                                .ToList();
+
+            var recommendedArticles = new List<Article>();
+            foreach (var code in itemIds)
+            {
+                string articleCacheKey = $"article:{code}";
+                var cachedArticle = await _redis.StringGetAsync(articleCacheKey);
+                if (!cachedArticle.IsNullOrEmpty)
+                {
+                    recommendedArticles.Add(JsonSerializer.Deserialize<Article>(cachedArticle));
+                }
+                else
+                {
+                    var article = await _context.Articles.FirstOrDefaultAsync(a => a.ArtCode == code);
+                    if (article != null)
+                    {
+                        recommendedArticles.Add(article);
+                        await _redis.StringSetAsync(articleCacheKey, JsonSerializer.Serialize(article), TimeSpan.FromHours(1));
+                    }
+                }
+            }
+
+            // Maintain the order from recommendations
+            recommendedArticles = recommendedArticles
+                .OrderBy(a => itemIds.IndexOf(a.ArtCode))
+                .ToList();
+
+            // Cache full result
+            await _redis.StringSetAsync(cacheKey, JsonSerializer.Serialize(recommendedArticles), TimeSpan.FromMinutes(30));
+
+            return recommendedArticles;
+        }
+
+        public async Task<bool> UpdateProduitFlag(int id, int newFlag)
+        {
+            var article = await _context.Articles.FindAsync(id);
+            if (article == null)
+            {
+                return false;
+            }
+
+            article.ArtFlag = newFlag;
+            await _context.SaveChangesAsync();
+
             return true;
         }
     }

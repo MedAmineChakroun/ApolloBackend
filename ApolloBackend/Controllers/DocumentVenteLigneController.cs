@@ -50,6 +50,29 @@ namespace ApolloBackend.Controllers
         {
             return await _documentVenteLigneService.getTopDocumentVenteLignes();
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDocumentVenteLigne(int id, [FromBody] DocumentVenteLigneDto dto)
+        {
+            var updated = await _documentVenteLigneService.UpdateDocumentVenteLigne(id, dto);
+            if (!updated)
+            {
+                return NotFound();
+            }
+
+            return NoContent(); // ou return Ok() si tu veux renvoyer un message
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDocumentVenteLigne(int id)
+        {
+            var deleted = await _documentVenteLigneService.deleteDocumentVenteLigne(id);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+            return NoContent(); // 204
+        }
+
 
     }
 }

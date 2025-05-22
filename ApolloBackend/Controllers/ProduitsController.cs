@@ -4,6 +4,7 @@ using ApolloBackend.Models.DTOs;
 using ApolloBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,10 +16,11 @@ namespace ApolloBackend.Controllers
     public class ProduitsController : ControllerBase
     {
         private readonly ProduitsFunctions _produitsFunctions;
-
+  
         public ProduitsController(ProduitsFunctions produitsFunctions)
         {
             _produitsFunctions = produitsFunctions;
+           
         }
 
         [HttpGet]
@@ -141,7 +143,32 @@ namespace ApolloBackend.Controllers
 
             return NoContent();
         }
+        [HttpGet("recommendations/{tiersCode}/{limit}")]
+        public async Task<IActionResult> GetRecommendations([FromRoute] string tiersCode, [FromRoute] int limit)
+        {
+            if (string.IsNullOrWhiteSpace(tiersCode))
+            {
+                return BadRequest("Tiers code is required.");
+            }
+            var recommendations = await _produitsFunctions.GetRecommendations(tiersCode, limit);
+            if (recommendations == null || !recommendations.Any())
+            {
+                return NotFound("No recommendations found for the given tiers code.");
+            }
+            return Ok(recommendations);
+        }
+        [HttpPost("recommendations/cart")]
+        public async Task<IActionResult> GetProduitsByCodesLimited([FromBody] ArticlesByIdsRequest request)
+        {
+            var articles = await _produitsFunctions.GetProduitsByCodesLimited(request.item_ids, request.Count);
+            return Ok(articles);
+        }
 
     }
 
+    public class ArticlesByIdsRequest
+    {
+        public List<string> item_ids { get; set; }
+        public int Count { get; set; }
+    }
 }

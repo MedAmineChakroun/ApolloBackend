@@ -15,6 +15,12 @@ namespace ApolloBackend.Functions
             _Erpcontext = ERPContext;
         }
 
+        public async Task<ListeFamille> GetFamilleByIntitule(string id)
+        {
+            return await _Erpcontext.ListeFamilles
+                .FirstOrDefaultAsync(f => f.FamIntitule == id);
+        }
+
         public async Task<List<ListeFamille>> GetFamilles()
         {
             return await _Erpcontext.ListeFamilles.ToListAsync();
@@ -23,5 +29,6 @@ namespace ApolloBackend.Functions
         {
             return await _Erpcontext.ListeFamilles.CountAsync();
         }
+
     }
 }

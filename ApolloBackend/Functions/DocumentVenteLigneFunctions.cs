@@ -61,7 +61,36 @@ namespace ApolloBackend.Functions
             return topDistinctLignes;
         }
 
+        public async Task<bool> UpdateDocumentVenteLigne(int id, DocumentVenteLigneDto dto)
+        {
+            var ligne = await _context.DocumentVenteLignes.FindAsync(id);
+            if (ligne == null)
+                return false;
 
+            ligne.LigneQte = dto.LigneQte;
+            ligne.LignePu = dto.LignePu;
+            ligne.LigneHt = dto.LigneHt;
+            ligne.LigneTtc = dto.LigneTtc;
+            ligne.LigneArtCode = dto.LigneArtCode;
+            ligne.LigneArtDesi = dto.LigneArtDesi;
+            ligne.LigneDocPiece = dto.LigneDocPiece;
+
+            _context.DocumentVenteLignes.Update(ligne);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> deleteDocumentVenteLigne(int id)
+        {
+            var ligne = await _context.DocumentVenteLignes.FindAsync(id);
+            if (ligne == null)
+                return false;
+
+            _context.DocumentVenteLignes.Remove(ligne);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 
 }
