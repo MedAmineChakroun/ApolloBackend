@@ -53,21 +53,11 @@ namespace ApolloBackend.Functions
                 commercial.Open();
 
                 var listDoc = (await _documentVenteService.GetDocumentVentes())
-                              .Where(r => r.DocFlag != 1)
+                              .Where(r => r.DocFlag != 1 && r.DocEtat == 1)
                               .ToList();
                 foreach (var entete in listDoc)
                 {
-                    if (!compta.FactoryTiers.ExistNumero(entete.DocTiersCode))
-                    {
-
-                        var clientAdd = (IBOClient3)compta.FactoryClient.Create();
-                        clientAdd.CT_Num = entete.DocTiersCode;
-                        clientAdd.CT_Intitule = entete.DocTiersIntitule.Length > 68
-                            ? entete.DocTiersIntitule.Substring(0, 68)
-                            : entete.DocTiersIntitule;
-                        clientAdd.SetDefault();
-                        clientAdd.WriteDefault();
-                    }
+                    await SynchroniseClients(entete.DocTiersCode);
 
                     var nouveauCommande = commercial.FactoryDocumentVente.CreateType(DocumentType.DocumentTypeVenteCommande);
                     var client = compta.FactoryClient.ReadNumero(entete.DocTiersCode);
@@ -75,7 +65,7 @@ namespace ApolloBackend.Functions
                     nouveauCommande.SetDefaultClient(client);
                     nouveauCommande.DO_Date = entete.DocDate ?? DateTime.Now;
                     nouveauCommande.DO_Ref = entete.DocPiece;
-                    nouveauCommande.SetDefaultDO_Piece();
+                    nouveauCommande.DO_Piece = entete.DocPiece;
                     nouveauCommande.WriteDefault();
 
                     var lignesAssociees = await _documentVenteLigneService.getByDocumentVenteLignePiece(entete.DocPiece);
@@ -86,22 +76,20 @@ namespace ApolloBackend.Functions
                         var famille = await _familleService.GetFamilleByIntitule(produit.ArtFamille);
                         var famCode = famille.FamCode;
 
-                        if (!commercial.FactoryArticle.ExistReference(ligne.LigneArtCode))
-                        {
-                            var articleAdd = (IBOArticle3)commercial.FactoryArticle.Create();
-                            articleAdd.AR_Ref = ligne.LigneArtCode;
-                            articleAdd.AR_Design = ligne.LigneArtDesi;
-                            articleAdd.Famille = commercial.FactoryFamille.ReadCode(FamilleType.FamilleTypeDetail, famCode);
-                            articleAdd.WriteDefault();
-                        }
+                        await SynchroniseArticles(ligne.LigneArtCode);
 
                         var article = commercial.FactoryArticle.ReadReference(ligne.LigneArtCode);
+
                         var ligneCommande = (IBODocumentVenteLigne3)nouveauCommande.FactoryDocumentLigne.Create();
                         ligneCommande.SetDefaultArticle(article, Convert.ToDouble(ligne.LigneQte));
                         ligneCommande.DL_PrixUnitaire = Convert.ToDouble(ligne.LignePu);
                         ligneCommande.TTC = false;
                         ligneCommande.WriteDefault();
+
+                        
+                       
                     }
+                    
                     DocumentVente doc = await _documentVenteService.UpdateDocumentFlag(entete.DocId, 1);
                     //push to list
                     DocumentVenteListe.Add(doc);
@@ -165,7 +153,7 @@ namespace ApolloBackend.Functions
 
                 }
 
-                _produitService.UpdateProduitFlag(articleApp.ArtId, 1);
+                await _produitService.UpdateProduitFlag(articleApp.ArtId, 1);
 
                 return true;
             }
@@ -229,13 +217,110 @@ namespace ApolloBackend.Functions
                 clientAdd.WriteDefault();
 
 
-                _clientService.UpdateFlag(clientApp.TiersId, 1);
+                await _clientService.UpdateFlag(clientApp.TiersId, 1);
 
 
                 return true;
             }
             catch (Exception ex)
             {
+                return false;
+            }
+        }
+        public async Task<bool> DeleteArticle(string CodeArt)
+        {
+            try
+            {
+                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+
+                var compta = new BSCPTAApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.mae"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
+                };
+
+                var commercial = new BSCIALApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.gcm"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
+                    CptaApplication = compta
+                };
+
+                compta.Open();
+                commercial.Open();
+
+                var Article = (IBOArticle3)commercial.FactoryArticle.ReadReference(CodeArt);
+                Article.Remove();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
+                return false;
+            }
+
+        }
+        public async Task<bool> DeleteClient(string CodeClient)
+        {
+            try
+            {
+                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+
+                var compta = new BSCPTAApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.mae"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
+                };
+
+                var commercial = new BSCIALApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.gcm"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
+                    CptaApplication = compta
+                };
+
+                compta.Open();
+                commercial.Open();
+                var Client = (IBOClient3)compta.FactoryClient.ReadNumero(CodeClient);
+                Client.Remove();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
+                return false;
+            }
+
+        }
+
+        public async Task<bool> DeleteCommande(string NumDocument)
+        {
+            try
+            {
+                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+
+                var compta = new BSCPTAApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.mae"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
+                };
+
+                var commercial = new BSCIALApplication100c
+                {
+                    Name = Path.Combine(basePath, "ALLANI.gcm"),
+                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
+                    CptaApplication = compta
+                };
+
+                compta.Open();
+                commercial.Open();
+                var Commande = commercial.FactoryDocumentVente.ReadPiece(DocumentType.DocumentTypeVenteCommande, NumDocument);
+                Commande.Remove();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if needed
                 return false;
             }
         }

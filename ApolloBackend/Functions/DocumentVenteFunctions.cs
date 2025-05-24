@@ -85,6 +85,7 @@ namespace ApolloBackend.Functions
                 return null;
             doc.DocEtat = etat;
             doc.DocNote = note;
+            doc.DocFlag = 0;
             _context.DocumentVentes.Update(doc);
             await _context.SaveChangesAsync();
             return doc;
@@ -112,7 +113,7 @@ namespace ApolloBackend.Functions
             document.DocTiersIntitule = dto.DocTiersIntitule;
             document.DocTht = dto.DocTht;
             document.DocTtc = dto.DocTtc;
-
+            document.DocFlag = 0;
             _context.DocumentVentes.Update(document);
             await _context.SaveChangesAsync();
 

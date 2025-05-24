@@ -25,7 +25,7 @@ namespace ApolloBackend.Controllers
       //  [Authorize(Roles ="admin")]
         public async Task<ActionResult<IEnumerable<Client>>> GetAll()
         {
-            return await _db.Clients.ToListAsync();
+            return await _db.Clients.OrderByDescending(r=>r.TiersDateCreate).ToListAsync();
         }
 
         [HttpGet("{id}")]

@@ -133,7 +133,12 @@ namespace ApolloBackend.Controllers
 
             return Ok(updatedProduitsuccess);
         }
-
+        [HttpPatch("updateFlag/{id}")]
+        public async Task<IActionResult> UpdateProduitFlag(int id , [FromQuery] int flag)
+        {
+            await _produitsFunctions.UpdateProduitFlag(id, flag);
+            return NoContent();
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduit(int id)
         {

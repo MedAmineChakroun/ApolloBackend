@@ -119,6 +119,13 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
     };
 });
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(7257, listenOptions =>
+    {
+        listenOptions.UseHttps(); // if using HTTPS
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
