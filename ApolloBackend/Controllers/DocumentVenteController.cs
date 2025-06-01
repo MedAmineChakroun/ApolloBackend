@@ -215,6 +215,24 @@ namespace ApolloBackend.Controllers
                 Console.WriteLine($"❌ Failed to send email to client {tiersCode}: {ex.Message}");
             }
         }
+        [HttpGet("isProductPurshased/{tiersCode}/{artCode}")]
+        public async Task<ActionResult<bool>> IsProductPurshased(string tiersCode, string artCode)
+        {
+            var result = await _documentVenteService.isProductPurshased(tiersCode, artCode);
+            return Ok(result);
+        }
+        [HttpGet("hasOrders/{tiersCode}")]
+        public async Task<ActionResult<bool>> HasOrders(string tiersCode)
+        {
+            var result = await _documentVenteService.HasOrders(tiersCode);
+            return Ok(result);
+        }
+        [HttpGet("hasOrdersForArticles/{artCode}")]
+        public async Task<ActionResult<bool>> HasOrdersForArticles(string artCode)
+        {
+            var result = await _documentVenteService.HasOrdersForArticles(artCode);
+            return Ok(result);
+        }
 
     }
 

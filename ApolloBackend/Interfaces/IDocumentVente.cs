@@ -19,7 +19,9 @@ namespace ApolloBackend.Interfaces
 
         Task<bool> DeleteCommande(int id);
         Task<bool> UpdateDocumentVente(int id, DocumentVenteDto dto);
+        Task<bool> isProductPurshased(string tiersCode, string artCode);
 
-
+        Task<bool> HasOrders(string tiersCode);
+        Task<bool> HasOrdersForArticles(string artCode);
     }
 }

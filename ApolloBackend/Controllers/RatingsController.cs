@@ -55,7 +55,22 @@ namespace ApolloBackend.Controllers
             }
 
             await _context.SaveChangesAsync();
-
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var httpClient = new HttpClient();
+                    var response = await httpClient.PostAsync("http://localhost:5000/light-refresh", null);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"[FLASK] Failed to call light-refresh: {response.StatusCode}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FLASK] Error calling light-refresh: {ex.Message}");
+                }
+            });
             return Ok(rating);
         }
 
@@ -82,6 +97,13 @@ namespace ApolloBackend.Controllers
                 .AverageAsync(r => (double?)r.Stars) ?? 0;
 
             return Ok(avg);
+        }
+        [HttpGet("count/{productId}")]
+        public async Task<int> GetRatingCount(int productId)
+        {
+            return await _context.Ratings
+                .Where(r => r.ProductId == productId)
+                .CountAsync();
         }
     }
 }

@@ -13,6 +13,7 @@ namespace ApolloBackend.Functions
         public readonly ProduitsFunctions _produitService;
         private readonly FamilleFunctions _familleService;
         private readonly IClients _clientService;
+
         public SynchronisationSageFunctions(
            IDocumentVente documentVenteService,
            IDocumentVenteLigne documentVenteLigneService,
@@ -26,35 +27,43 @@ namespace ApolloBackend.Functions
             _produitService = produitsService;
             _familleService = familleService;
             _clientService = clientService;
-
         }
+
+        private (BSCPTAApplication100c compta, BSCIALApplication100c commercial) ConnectToSage()
+        {
+            var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+
+            var compta = new BSCPTAApplication100c
+            {
+                Name = Path.Combine(basePath, "ALLANI.mae"),
+                Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
+            };
+
+            var commercial = new BSCIALApplication100c
+            {
+                Name = Path.Combine(basePath, "ALLANI.gcm"),
+                Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
+                CptaApplication = compta
+            };
+
+            compta.Open();
+            commercial.Open();
+
+            return (compta, commercial);
+        }
+
         public async Task<List<DocumentVente>> SynchroniseCommandes()
         {
             List<DocumentVente> DocumentVenteListe = new List<DocumentVente>();
 
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
-
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
+                var (compta, commercial) = ConnectToSage();
 
                 var listDoc = (await _documentVenteService.GetDocumentVentes())
                               .Where(r => r.DocFlag != 1 && r.DocEtat == 1)
                               .ToList();
+
                 foreach (var entete in listDoc)
                 {
                     await SynchroniseClients(entete.DocTiersCode);
@@ -85,17 +94,11 @@ namespace ApolloBackend.Functions
                         ligneCommande.DL_PrixUnitaire = Convert.ToDouble(ligne.LignePu);
                         ligneCommande.TTC = false;
                         ligneCommande.WriteDefault();
-
-                        
-                       
                     }
-                    
+
                     DocumentVente doc = await _documentVenteService.UpdateDocumentFlag(entete.DocId, 1);
-                    //push to list
                     DocumentVenteListe.Add(doc);
                 }
-
-
 
                 return DocumentVenteListe;
             }
@@ -110,23 +113,7 @@ namespace ApolloBackend.Functions
         {
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
-
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
+                var (compta, commercial) = ConnectToSage();
 
                 var produit = await _produitService.GetProduitByCode(CodeArt);
                 var famille = await _familleService.GetFamilleByIntitule(produit.ArtFamille);
@@ -150,7 +137,6 @@ namespace ApolloBackend.Functions
                     articleAdd.Famille = commercial.FactoryFamille.ReadCode(FamilleType.FamilleTypeDetail, famCode);
 
                     articleAdd.Write();
-
                 }
 
                 await _produitService.UpdateProduitFlag(articleApp.ArtId, 1);
@@ -162,30 +148,14 @@ namespace ApolloBackend.Functions
                 // Log the exception if needed
                 return false;
             }
-
         }
 
         public async Task<bool> SynchroniseClients(string CodeClient)
         {
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+                var (compta, commercial) = ConnectToSage();
 
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
                 var clientApp = _clientService.GetClientByCodeAsync(CodeClient).Result;
                 IBOClient3 clientAdd;
 
@@ -216,9 +186,7 @@ namespace ApolloBackend.Functions
                 clientAdd.SetDefault();
                 clientAdd.WriteDefault();
 
-
                 await _clientService.UpdateFlag(clientApp.TiersId, 1);
-
 
                 return true;
             }
@@ -227,27 +195,12 @@ namespace ApolloBackend.Functions
                 return false;
             }
         }
+
         public async Task<bool> DeleteArticle(string CodeArt)
         {
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
-
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
+                var (compta, commercial) = ConnectToSage();
 
                 var Article = (IBOArticle3)commercial.FactoryArticle.ReadReference(CodeArt);
                 Article.Remove();
@@ -255,32 +208,16 @@ namespace ApolloBackend.Functions
             }
             catch (Exception ex)
             {
-                // Log the exception if needed
                 return false;
             }
-
         }
+
         public async Task<bool> DeleteClient(string CodeClient)
         {
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+                var (compta, commercial) = ConnectToSage();
 
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
                 var Client = (IBOClient3)compta.FactoryClient.ReadNumero(CodeClient);
                 Client.Remove();
                 return true;
@@ -290,30 +227,14 @@ namespace ApolloBackend.Functions
                 // Log the exception if needed
                 return false;
             }
-
         }
 
         public async Task<bool> DeleteCommande(string NumDocument)
         {
             try
             {
-                var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files");
+                var (compta, commercial) = ConnectToSage();
 
-                var compta = new BSCPTAApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.mae"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" }
-                };
-
-                var commercial = new BSCIALApplication100c
-                {
-                    Name = Path.Combine(basePath, "ALLANI.gcm"),
-                    Loggable = { UserName = "<Administrateur>", UserPwd = "P@ssw0rd" },
-                    CptaApplication = compta
-                };
-
-                compta.Open();
-                commercial.Open();
                 var Commande = commercial.FactoryDocumentVente.ReadPiece(DocumentType.DocumentTypeVenteCommande, NumDocument);
                 Commande.Remove();
                 return true;

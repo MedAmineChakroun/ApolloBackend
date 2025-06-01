@@ -60,7 +60,11 @@ builder.Services.AddCors(options =>
                         .AllowCredentials()); // Optional if using authentication cookies
 });
 // Add services to the container.
-
+// Kestrel must expose port 5251
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5251); // HTTP only for metrics access
+});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

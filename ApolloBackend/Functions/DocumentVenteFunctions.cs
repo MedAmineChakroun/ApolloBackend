@@ -2,19 +2,23 @@
 using ApolloBackend.Interfaces;
 using ApolloBackend.Models;
 using ApolloBackend.Models.DTOs;
-using Azure;
-using Microsoft.CodeAnalysis.Editing;
+
+
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+
+
 
 namespace ApolloBackend.Functions
 {
     public class DocumentVenteFunctions : IDocumentVente
     {
         private readonly AppDbContext _context;
+
+
         public DocumentVenteFunctions(AppDbContext context)
         {
             _context = context;
+
         }
         public async Task<List<DocumentVente>> GetDocumentVentes()
         {
@@ -42,6 +46,9 @@ namespace ApolloBackend.Functions
             DocumentVente.DocFlag = 0;
             _context.DocumentVentes.Add(DocumentVente);
             await _context.SaveChangesAsync();
+
+          
+
             return DocumentVente;
         }
         public async Task<DocumentVente> GetDocumentByPieceCode(string PieceCode)
@@ -118,6 +125,42 @@ namespace ApolloBackend.Functions
             await _context.SaveChangesAsync();
 
             return true;
+        }
+        public async Task<bool> isProductPurshased(string tiersCode, string artCode)
+        {
+            // Check if both parameters are provided
+            if (string.IsNullOrEmpty(tiersCode) || string.IsNullOrEmpty(artCode))
+                return false;
+
+
+            var exists = await _context.DocumentVentes
+                .Where(doc => doc.DocTiersCode == tiersCode && doc.DocEtat == 1)
+                .Join(_context.DocumentVenteLignes,
+                      doc => doc.DocPiece,
+                      ligne => ligne.LigneDocPiece,
+                      (doc, ligne) => ligne)
+                .AnyAsync(ligne => ligne.LigneArtCode == artCode);
+
+            return exists;
+        }
+        public async Task<bool> HasOrders(string tiersCode)
+        {
+            // Check if TiersCode is provided
+            if (string.IsNullOrEmpty(tiersCode))
+                return false;
+
+            // Check if there's at least one order for this TiersCode
+            return await _context.DocumentVentes
+                .AnyAsync(doc => doc.DocTiersCode == tiersCode);
+        }
+        public async Task<bool> HasOrdersForArticles(string artCode)
+        {
+            // Check if ArtCode is provided
+            if (string.IsNullOrEmpty(artCode))
+                return false;
+            // Check if there's at least one order for this ArtCode
+            return await _context.DocumentVenteLignes
+                .AnyAsync(ligne => ligne.LigneArtCode == artCode);
         }
 
     }
