@@ -73,6 +73,20 @@ namespace ApolloBackend.Controllers
             return NoContent(); // 204
         }
 
+        [HttpGet("top-products")]
+        public async Task<ActionResult<List<object>>> GetTop10BestSellingProducts()
+        {
+            var topProducts = await _documentVenteLigneService.GetTop10BestSellingProducts();
+            return Ok(topProducts);
+        }
+
+        [HttpGet("top-categories")]
+        public async Task<ActionResult<List<object>>> GetTop4BestSellingCategories()
+        {
+            var topCategories = await _documentVenteLigneService.GetTop4BestSellingCategories();
+            return Ok(topCategories);
+        }
+
 
     }
 }

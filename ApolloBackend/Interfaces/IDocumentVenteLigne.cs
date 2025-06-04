@@ -13,7 +13,8 @@ namespace ApolloBackend.Interfaces
         Task<List<DocumentVenteLigne>> getTopDocumentVenteLignes();
         Task<bool> deleteDocumentVenteLigne(int id);
         Task<bool> UpdateDocumentVenteLigne(int id, DocumentVenteLigneDto dto);
-
+        Task<List<object>> GetTop10BestSellingProducts();
+        Task<List<object>> GetTop4BestSellingCategories();
 
     }
 

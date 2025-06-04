@@ -91,6 +91,66 @@ namespace ApolloBackend.Functions
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<object>> GetTop10BestSellingProducts()
+        {
+            var topProducts = await _context.DocumentVenteLignes
+                .Join(_context.DocumentVentes, // Assuming this is your main document table
+                      ligne => ligne.LigneDocPiece,
+                      doc => doc.DocPiece, // Assuming DocPiece is the key field
+                      (ligne, doc) => new { ligne, doc })
+                .Where(x => x.doc.DocEtat == 1) // Filter for DocEtat == 1
+                .GroupBy(x => x.ligne.LigneArtCode)
+                .Select(g => new
+                {
+                    ArtCode = g.Key,
+                    TotalQuantity = g.Sum(x => x.ligne.LigneQte)
+                })
+                .OrderByDescending(x => x.TotalQuantity)
+                .Take(10)
+                .Join(_context.Articles,
+                      sale => sale.ArtCode,
+                      article => article.ArtCode,
+                      (sale, article) => new
+                      {
+                          Article = article,
+                          TotalQuantitySold = sale.TotalQuantity
+                      })
+                .Select(x => new
+                {
+                    x.Article,
+                    x.TotalQuantitySold
+                })
+                .ToListAsync();
+
+            return topProducts.Cast<object>().ToList();
+        }
+
+        public async Task<List<object>> GetTop4BestSellingCategories()
+        {
+            var topCategories = await _context.DocumentVenteLignes
+                .Join(_context.DocumentVentes, // Assuming this is your main document table
+                      ligne => ligne.LigneDocPiece,
+                      doc => doc.DocPiece, // Assuming DocPiece is the key field
+                      (ligne, doc) => new { ligne, doc })
+                .Where(x => x.doc.DocEtat == 1) // Filter for DocEtat == 1
+                .Join(_context.Articles,
+                      x => x.ligne.LigneArtCode,
+                      article => article.ArtCode,
+                      (x, article) => new { x.ligne, article })
+                .Where(x => !string.IsNullOrEmpty(x.article.ArtFamille))
+                .GroupBy(x => x.article.ArtFamille)
+                .Select(g => new
+                {
+                    CategoryName = g.Key,
+                    TotalQuantitySold = g.Sum(x => x.ligne.LigneQte)
+                })
+                .OrderByDescending(x => x.TotalQuantitySold)
+                .Take(4)
+                .ToListAsync();
+
+            return topCategories.Cast<object>().ToList();
+        }
     }
 
 }
